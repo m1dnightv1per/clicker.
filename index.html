@@ -1,951 +1,632 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Clicker Deluxe - Extended Edition</title>
-    <style>
-        :root {
-            --bg-primary: #fce4ec;
-            --bg-secondary: #f8bbd0;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --text-dark: #2c3e50;
-            --text-light: #7f8c8d;
-            --accent-main: #ec407a;
-            --accent-hover: #d81b60;
-            --gold: #f39c12;
-            --shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
-            --border-radius: 20px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cat Clicker Deluxe - Extended Edition</title>
+<style>
+:root{--bg-primary:#fce4ec;--bg-secondary:#f8bbd0;--card-bg:rgba(255,255,255,.9);--text-dark:#2c3e50;--text-light:#7f8c8d;--accent-main:#ec407a;--accent-hover:#d81b60;--gold:#f39c12;--shadow:0 12px 32px rgba(0,0,0,.1);--border-radius:20px}
+[data-theme="dark"]{--bg-primary:#1a1a2e;--bg-secondary:#16213e;--card-bg:rgba(30,30,50,.9);--text-dark:#e0e0e0;--text-light:#a0a0a0;--accent-main:#ff4081;--accent-hover:#f50057;--shadow:0 12px 32px rgba(0,0,0,.5)}
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none}
+body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:linear-gradient(135deg,var(--bg-primary),var(--bg-secondary));color:var(--text-dark);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;transition:background .3s,color .3s}
+header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
+.logo-title{display:flex;align-items:center;gap:12px;font-size:24px;font-weight:900;color:var(--accent-main)}
+.header-controls{display:flex;align-items:center;gap:10px}
+.nav-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab-btn{background:transparent;border:2px solid var(--accent-main);color:var(--accent-main);padding:8px 16px;border-radius:20px;font-weight:700;cursor:pointer;transition:all .2s}
+.tab-btn.active,.tab-btn:hover{background:var(--accent-main);color:#fff;transform:translateY(-2px)}
+.icon-btn{background:var(--card-bg);border:2px solid var(--accent-main);color:var(--text-dark);border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.icon-btn:hover{transform:scale(1.1)}
+.app-container{display:grid;grid-template-columns:340px 1fr 360px;gap:20px;padding:20px;max-width:1650px;margin:0 auto;width:100%;flex:1}
+.app-container.one-col{grid-template-columns:1fr;max-width:1100px}
+.panel{background:var(--card-bg);border-radius:var(--border-radius);padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 120px);overflow-y:auto}
+.one-col .panel{max-height:none}
+.panel-title{font-size:18px;font-weight:800;border-bottom:2px solid rgba(150,150,150,.1);padding-bottom:10px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.clicker-section{align-items:center;justify-content:center;position:relative}
+.score-board{text-align:center;margin-bottom:20px;background:rgba(0,0,0,.04);padding:16px 24px;border-radius:16px;width:100%;max-width:420px}
+.pat-counter{font-size:48px;font-weight:900;color:var(--accent-main);margin:0}
+.pps-counter{font-size:14px;color:var(--text-light);margin-top:4px;font-weight:600}
+.cat-stage{position:relative;width:260px;height:260px;display:flex;align-items:center;justify-content:center}
+.cat-button{width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,var(--card-bg) 0%,var(--bg-primary) 100%);border:8px solid var(--accent-main);cursor:pointer;outline:none;font-size:120px;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:transform .08s;position:relative;z-index:10}
+.cat-button:active{transform:scale(.92) rotate(-4deg)}
+.click-particle{position:fixed;font-weight:900;font-size:24px;color:var(--accent-main);pointer-events:none;animation:floatAndFade .8s forwards ease-out;z-index:50}
+@keyframes floatAndFade{0%{opacity:1;transform:translate(-50%,-50%) scale(.8)}50%{transform:translate(-50%,-90px) scale(1.2)}100%{opacity:0;transform:translate(-50%,-130px) scale(1)}}
+.golden-cat{position:fixed;font-size:60px;cursor:pointer;z-index:999;animation:goldenPulse .6s infinite alternate;filter:drop-shadow(0 0 15px #f1c40f)}
+@keyframes goldenPulse{0%{transform:scale(1)}100%{transform:scale(1.25)}}
+.upgrade-card{background:rgba(0,0,0,.03);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;border:2px solid transparent;margin-bottom:10px}
+.upgrade-card:hover:not(.disabled){transform:translateY(-2px);border-color:var(--accent-main);background:rgba(0,0,0,.06)}
+.upgrade-card.disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.8)}
+.upgrade-icon{font-size:30px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:var(--card-bg);border-radius:10px}
+.upgrade-details{flex:1}
+.upgrade-name{font-weight:800;font-size:14px;margin:0 0 2px}
+.upgrade-effect{font-size:11px;color:var(--text-light);margin:0 0 3px}
+.upgrade-cost{font-weight:800;color:var(--accent-main);font-size:12px}
+.upgrade-count{font-size:18px;font-weight:900;color:var(--text-light)}
+.achievements-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:12px}
+.achievement-badge{aspect-ratio:1;background:rgba(0,0,0,.03);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3;filter:grayscale(1);border:2px dashed var(--text-light)}
+.achievement-badge.unlocked{opacity:1;filter:grayscale(0);border:2px solid var(--gold);background:rgba(241,196,15,.15)}
+.toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:1000}
+.toast{background:var(--card-bg);border-left:6px solid var(--gold);padding:14px 18px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:12px;font-weight:700;font-size:13px}
+.btn-action{background:var(--accent-main);color:#fff;border:none;padding:10px 18px;border-radius:10px;font-weight:800;cursor:pointer;transition:all .2s}
+.btn-action:hover:not(.disabled){background:var(--accent-hover)}
+.btn-action.disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.8)}
+.btn-action small{font-weight:600;opacity:.9}
+.btn-danger{background:#e74c3c}
+.btn-gold{background:var(--gold)}
+.btn-ghost{background:transparent;border:2px solid var(--accent-main);color:var(--accent-main)}
+.btn-ghost:hover:not(.disabled){background:var(--accent-main);color:#fff}
+.stats-list{display:flex;flex-direction:column;gap:10px}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(150,150,150,.1);font-weight:600}
 
-        [data-theme="dark"] {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
-            --card-bg: rgba(30, 30, 50, 0.9);
-            --text-dark: #e0e0e0;
-            --text-light: #a0a0a0;
-            --accent-main: #ff4081;
-            --accent-hover: #f50057;
-            --shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-        }
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
-            color: var(--text-dark);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-            transition: background 0.3s ease, color 0.3s ease;
-        }
-
-        header {
-            background-color: var(--card-bg);
-            padding: 14px 28px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .logo-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--accent-main);
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: 2px solid var(--accent-main);
-            color: var(--accent-main);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .tab-btn.active, .tab-btn:hover {
-            background: var(--accent-main);
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-
-        .icon-btn {
-            background: var(--card-bg);
-            border: 2px solid var(--accent-main);
-            color: var(--text-dark);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
-        }
-
-        .icon-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .app-container {
-            display: grid;
-            grid-template-columns: 340px 1fr 360px;
-            gap: 20px;
-            padding: 20px;
-            max-width: 1650px;
-            margin: 0 auto;
-            width: 100%;
-            flex: 1;
-        }
-
-        .panel {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            max-height: calc(100vh - 120px);
-            overflow-y: auto;
-        }
-
-        .panel-title {
-            font-size: 18px;
-            font-weight: 800;
-            border-bottom: 2px solid rgba(150, 150, 150, 0.1);
-            padding-bottom: 10px;
-            margin: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .clicker-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 24px;
-            box-shadow: var(--shadow);
-        }
-
-        .score-board {
-            text-align: center;
-            margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 16px 24px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 420px;
-        }
-
-        .pat-counter {
-            font-size: 48px;
-            font-weight: 900;
-            color: var(--accent-main);
-            margin: 0;
-        }
-
-        .pps-counter {
-            font-size: 14px;
-            color: var(--text-light);
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        .cat-stage {
-            position: relative;
-            width: 260px;
-            height: 260px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .cat-button {
-            width: 230px;
-            height: 230px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--card-bg) 0%, var(--bg-primary) 100%);
-            border: 8px solid var(--accent-main);
-            cursor: pointer;
-            outline: none;
-            font-size: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-            transition: transform 0.08s ease;
-            position: relative;
-            z-index: 10;
-        }
-
-        .cat-button:active {
-            transform: scale(0.92) rotate(-4deg);
-        }
-
-        .click-particle {
-            position: absolute;
-            font-weight: 900;
-            font-size: 24px;
-            color: var(--accent-main);
-            pointer-events: none;
-            animation: floatAndFade 0.8s forwards ease-out;
-            z-index: 50;
-        }
-
-        @keyframes floatAndFade {
-            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8) translateY(0); }
-            50% { transform: translate(-50%, -50%) scale(1.2) translateY(-40px); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1) translateY(-80px); }
-        }
-
-        .golden-cat {
-            position: fixed;
-            font-size: 60px;
-            cursor: pointer;
-            z-index: 999;
-            animation: goldenPulse 0.6s infinite alternate;
-            filter: drop-shadow(0 0 15px #f1c40f);
-        }
-
-        @keyframes goldenPulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.25); }
-        }
-
-        .upgrade-card {
-            background: rgba(0, 0, 0, 0.03);
-            border-radius: 12px;
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: transform 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
-            border: 2px solid transparent;
-        }
-
-        .upgrade-card:hover:not(.disabled) {
-            transform: translateY(-2px);
-            border-color: var(--accent-main);
-            background: rgba(0, 0, 0, 0.06);
-        }
-
-        .upgrade-card.disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            filter: grayscale(0.8);
-        }
-
-        .upgrade-icon {
-            font-size: 30px;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--card-bg);
-            border-radius: 10px;
-        }
-
-        .upgrade-details { flex: 1; }
-        .upgrade-name { font-weight: 800; font-size: 14px; margin: 0 0 2px 0; }
-        .upgrade-effect { font-size: 11px; color: var(--text-light); margin: 0 0 3px 0; }
-        .upgrade-cost { font-weight: 800; color: var(--accent-main); font-size: 12px; }
-        .upgrade-count { font-size: 18px; font-weight: 900; color: var(--text-light); }
-
-        .cat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .cat-card {
-            background: rgba(0, 0, 0, 0.03);
-            border: 2px solid transparent;
-            border-radius: 16px;
-            padding: 16px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .cat-card.equipped {
-            border-color: var(--accent-main);
-            background: rgba(236, 64, 122, 0.1);
-        }
-
-        .cat-card .cat-avatar { font-size: 54px; }
-        .cat-card .cat-title { font-weight: 800; font-size: 16px; }
-        .cat-card .cat-mult { font-size: 13px; color: var(--gold); font-weight: 700; }
-
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 12px;
-        }
-
-        .achievement-badge {
-            aspect-ratio: 1;
-            background: rgba(0, 0, 0, 0.03);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            opacity: 0.3;
-            filter: grayscale(1);
-            border: 2px dashed var(--text-light);
-        }
-
-        .achievement-badge.unlocked {
-            opacity: 1;
-            filter: grayscale(0);
-            border: 2px solid var(--gold);
-            background: rgba(241, 196, 15, 0.15);
-        }
-
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 1000;
-        }
-
-        .toast {
-            background: var(--card-bg);
-            border-left: 6px solid var(--gold);
-            padding: 14px 18px;
-            border-radius: 10px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .btn-action {
-            background: var(--accent-main);
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s ease;
-        }
-
-        .btn-action:hover:not(.disabled) { background: var(--accent-hover); transform: translateY(-1px); }
-        .btn-action.disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
-        .btn-danger { background: #e74c3c; }
-        .btn-gold { background: var(--gold); }
-
-        .stats-list { display: flex; flex-direction: column; gap: 10px; }
-        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(150,150,150,0.1); font-weight: 600; }
-
-        @media (max-width: 1100px) {
-            .app-container { grid-template-columns: 1fr; max-width: 650px; }
-            .panel { max-height: none; }
-        }
-    </style>
+/* Pets, eggs, inventory */
+.equipped-bar{font-size:26px;margin-top:6px;min-height:34px;letter-spacing:4px}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.slot{min-height:130px;border:2px dashed var(--text-light);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:8px;color:var(--text-light);font-weight:700;font-size:13px}
+.slot.filled{border:3px solid var(--rc);background:rgba(0,0,0,.03);color:var(--text-dark);cursor:pointer;transition:transform .15s}
+.slot.filled:hover{transform:translateY(-3px)}
+.slot .p-icon{font-size:44px}
+.row-btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.egg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.egg-card{background:rgba(0,0,0,.03);border:2px solid transparent;border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.egg-icon{font-size:64px;line-height:1}
+.odds{display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:center;font-size:12px;font-weight:800}
+.egg-card details{width:100%;font-size:12px;text-align:left}
+.egg-card summary{cursor:pointer;font-weight:800;color:var(--accent-main);text-align:center}
+.egg-card details div{padding:2px 0;font-weight:600}
+.egg-btns{display:flex;gap:8px;width:100%}
+.egg-btns .btn-action{flex:1;padding:8px 6px}
+.pet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.pet-card{background:rgba(0,0,0,.03);border:3px solid var(--rc);border-radius:14px;padding:10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+.pet-card.clickable{cursor:pointer;transition:transform .15s}
+.pet-card.clickable:hover{transform:translateY(-3px)}
+.pet-card .p-icon{font-size:42px}
+.pet-card .p-name{font-weight:800;font-size:13px}
+.pet-card .p-rar{font-size:11px;font-weight:900;color:var(--rc)}
+.pet-card .p-mult{font-size:12px;color:var(--gold);font-weight:800}
+.pet-card .p-qty{position:absolute;top:4px;right:8px;font-weight:900;font-size:13px;color:var(--text-light)}
+.pet-card .p-new{position:absolute;top:4px;left:8px;font-weight:900;font-size:11px;color:#fff;background:#e74c3c;border-radius:6px;padding:1px 5px}
+.pet-card.pop{animation:pop .45s ease-out backwards}
+@keyframes pop{0%{transform:scale(.2) rotate(-12deg);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@media (max-width:1100px){.app-container{grid-template-columns:1fr;max-width:650px}.panel{max-height:none}.slots{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
 <body>
 
-    <header>
-        <div class="logo-title">
-            <span>🐱</span>
-            <span>Cat Clicker Deluxe</span>
-        </div>
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('game', event)">Game</button>
-            <button class="tab-btn" onclick="switchTab('cats', event)">Cat Alley</button>
-            <button class="tab-btn" onclick="switchTab('stats', event)">Stats & Badges</button>
-            <button class="tab-btn" onclick="switchTab('prestige', event)">Reincarnate</button>
-            <button class="tab-btn" onclick="switchTab('settings', event)">Settings</button>
-        </div>
-        <div class="header-controls">
-            <button class="icon-btn" id="mute-btn" onclick="toggleMute()" title="Toggle Sound">🔊</button>
-            <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
-        </div>
-    </header>
+<header>
+    <div class="logo-title"><span>🐱</span><span>Cat Clicker Deluxe</span></div>
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('game', event)">Game</button>
+        <button class="tab-btn" onclick="switchTab('cats', event)">Cat Alley</button>
+        <button class="tab-btn" onclick="switchTab('stats', event)">Stats & Badges</button>
+        <button class="tab-btn" onclick="switchTab('prestige', event)">Reincarnate</button>
+        <button class="tab-btn" onclick="switchTab('settings', event)">Settings</button>
+    </div>
+    <div class="header-controls">
+        <button class="icon-btn" id="mute-btn" onclick="toggleMute()" title="Toggle Sound">🔊</button>
+        <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">🌙</button>
+    </div>
+</header>
 
-    <!-- Main Game Tab -->
-    <div class="app-container" id="game-tab">
-        <div class="panel">
-            <h3 class="panel-title">
-                <span>Click Upgrades</span>
-                <span id="click-power-display">Power: 1</span>
-            </h3>
-            <div id="click-upgrades-list"></div>
+<!-- Game Tab -->
+<div class="app-container" id="game-tab">
+    <div class="panel">
+        <h3 class="panel-title"><span>Click Upgrades</span><span id="click-power-display">Power: 1</span></h3>
+        <div id="click-upgrades-list"></div>
+    </div>
+    <div class="panel clicker-section">
+        <div class="score-board">
+            <div class="pat-counter" id="pat-count">0</div>
+            <div class="pps-counter">Pats per sec: <span id="pps-count">0.0</span></div>
+            <div class="pps-counter" style="color:var(--gold);font-weight:700">Golden Paw Multiplier: <span id="prestige-mult">1.0x</span></div>
+            <div class="pps-counter" style="color:var(--gold);font-weight:700">Pet Boost: <span id="pet-mult">1.0x</span></div>
+            <div class="equipped-bar" id="equipped-bar"></div>
         </div>
-
-        <div class="panel clicker-section">
-            <div class="score-board">
-                <div class="pat-counter" id="pat-count">0</div>
-                <div class="pps-counter">Pats per sec: <span id="pps-count">0.0</span></div>
-                <div class="pps-counter" style="color: var(--gold); font-weight: 700;">Golden Paw Multiplier: <span id="prestige-mult">1.0x</span></div>
-            </div>
-
-            <div class="cat-stage">
-                <button class="cat-button" id="cat-btn">🐱</button>
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn-action" onclick="audioEngine.playSound('meow')">🔊 Meow!</button>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h3 class="panel-title">
-                <span>Passive Empire</span>
-                <span>Buildings</span>
-            </h3>
-            <div id="passive-upgrades-list"></div>
+        <div class="cat-stage"><button class="cat-button" id="cat-btn">🐱</button></div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+            <button class="btn-action" onclick="audioEngine.playSound('meow')">🔊 Meow!</button>
         </div>
     </div>
+    <div class="panel">
+        <h3 class="panel-title"><span>Passive Empire</span><span>Buildings</span></h3>
+        <div id="passive-upgrades-list"></div>
+    </div>
+</div>
 
-    <!-- Cat Alley Tab -->
-    <div class="app-container" id="cats-tab" style="display: none;">
-        <div class="panel" style="grid-column: span 3;">
-            <h3 class="panel-title">Cat Alley — Adopt & Equip Cats</h3>
-            <p style="color: var(--text-light); font-size: 14px;">Unlock special cats with unique click multipliers to boost your empire!</p>
-            <div class="cat-grid" id="cats-list"></div>
+<!-- Cat Alley Tab -->
+<div class="app-container one-col" id="cats-tab" style="display:none">
+    <div class="panel">
+        <h3 class="panel-title"><span>Equipped Pets (<span id="slot-count">0</span>/4)</span><span style="color:var(--gold)">Pet Boost: <span id="pet-mult2">1.0x</span></span></h3>
+        <div class="slots" id="equipped-slots"></div>
+        <div class="row-btns">
+            <button class="btn-action btn-ghost" onclick="equipBest()">⭐ Equip Best</button>
+            <button class="btn-action btn-ghost" onclick="unequipAll()">Unequip All</button>
+            <span style="font-size:12px;color:var(--text-light)">Click a slot to unequip. Equipped pets add their boost to clicks and passive income.</span>
         </div>
     </div>
+    <div class="panel">
+        <h3 class="panel-title">Eggs</h3>
+        <div class="egg-grid" id="egg-list"></div>
+    </div>
+    <div class="panel" id="hatch-panel" style="display:none">
+        <h3 class="panel-title">Hatched!</h3>
+        <div class="pet-grid" id="hatch-results"></div>
+    </div>
+    <div class="panel">
+        <h3 class="panel-title"><span>Inventory</span><span style="font-size:14px;color:var(--text-light)">Discovered <span id="inv-count">0</span></span></h3>
+        <div class="pet-grid" id="inv-list"></div>
+    </div>
+</div>
 
-    <!-- Stats & Achievements Tab -->
-    <div class="app-container" id="stats-tab" style="display: none;">
-        <div class="panel">
-            <h3 class="panel-title">Statistics</h3>
-            <div class="stats-list">
-                <div class="stat-row"><span>Total Pats Earned:</span><span id="stat-total-pats">0</span></div>
-                <div class="stat-row"><span>Manual Clicks:</span><span id="stat-clicks">0</span></div>
-                <div class="stat-row"><span>Golden Cats Caught:</span><span id="stat-golden">0</span></div>
-                <div class="stat-row"><span>Time Played:</span><span id="stat-time">0s</span></div>
-                <div class="stat-row"><span>Reincarnations:</span><span id="stat-prestige">0</span></div>
-            </div>
-        </div>
-        <div class="panel" style="grid-column: span 2;">
-            <h3 class="panel-title">Achievements</h3>
-            <div class="achievements-grid" id="achievements-list"></div>
+<!-- Stats Tab -->
+<div class="app-container" id="stats-tab" style="display:none">
+    <div class="panel">
+        <h3 class="panel-title">Statistics</h3>
+        <div class="stats-list">
+            <div class="stat-row"><span>Total Pats Earned:</span><span id="stat-total-pats">0</span></div>
+            <div class="stat-row"><span>Manual Clicks:</span><span id="stat-clicks">0</span></div>
+            <div class="stat-row"><span>Golden Cats Caught:</span><span id="stat-golden">0</span></div>
+            <div class="stat-row"><span>Eggs Hatched:</span><span id="stat-eggs">0</span></div>
+            <div class="stat-row"><span>Time Played:</span><span id="stat-time">0s</span></div>
+            <div class="stat-row"><span>Reincarnations:</span><span id="stat-prestige">0</span></div>
         </div>
     </div>
+    <div class="panel" style="grid-column:span 2">
+        <h3 class="panel-title">Achievements</h3>
+        <div class="achievements-grid" id="achievements-list"></div>
+    </div>
+</div>
 
-    <!-- Reincarnation Tab -->
-    <div class="app-container" id="prestige-tab" style="display: none;">
-        <div class="panel" style="grid-column: span 3; text-align: center;">
-            <h2 style="color: var(--gold); font-size: 28px;">🐾 Golden Paw Reincarnation 🐾</h2>
-            <p>Ascend your empire! Reset your pats and buildings to receive permanent **Golden Paws**.</p>
-            <p style="font-size: 14px; color: var(--text-light);">Each Golden Paw grants a permanent **+10% production bonus** to all clicks and passive income!</p>
-            
-            <div style="margin: 30px 0;">
-                <h3 style="font-size: 20px;">Current Golden Paws: <span style="color: var(--gold);" id="current-paws">0</span></h3>
-                <h3 style="font-size: 28px; color: var(--gold); margin-top: 10px;">
-                    Pending Golden Paws: +<span id="pending-paws">0</span>
-                </h3>
-            </div>
-            
-            <div>
-                <button class="btn-action btn-gold" style="font-size: 18px; padding: 14px 36px;" onclick="doPrestige()">Reincarnate Now!</button>
-            </div>
+<!-- Reincarnation Tab -->
+<div class="app-container" id="prestige-tab" style="display:none">
+    <div class="panel" style="grid-column:span 3;text-align:center">
+        <h2 style="color:var(--gold);font-size:28px">🐾 Golden Paw Reincarnation 🐾</h2>
+        <p>Ascend your empire! Reset your pats and buildings to receive permanent <b>Golden Paws</b>.</p>
+        <p style="font-size:14px;color:var(--text-light)">Each Golden Paw grants a permanent <b>+10% production bonus</b> to all clicks and passive income. Your pets stay with you!</p>
+        <div style="margin:30px 0">
+            <h3 style="font-size:20px">Current Golden Paws: <span style="color:var(--gold)" id="current-paws">0</span></h3>
+            <h3 style="font-size:28px;color:var(--gold);margin-top:10px">Pending Golden Paws: +<span id="pending-paws">0</span></h3>
+        </div>
+        <div><button class="btn-action btn-gold" style="font-size:18px;padding:14px 36px" onclick="doPrestige()">Reincarnate Now!</button></div>
+    </div>
+</div>
+
+<!-- Settings Tab -->
+<div class="app-container" id="settings-tab" style="display:none">
+    <div class="panel" style="grid-column:span 3">
+        <h3 class="panel-title">Game Settings</h3>
+        <div style="display:flex;gap:15px;margin-top:15px;flex-wrap:wrap">
+            <button class="btn-action" onclick="saveGame(true)">💾 Save Game</button>
+            <button class="btn-action btn-ghost" onclick="toggleTheme()">🌗 Light / Dark Mode</button>
+            <button class="btn-action btn-danger" onclick="hardReset()">⚠️ Reset All Progress</button>
         </div>
     </div>
+</div>
 
-    <!-- Settings Tab -->
-    <div class="app-container" id="settings-tab" style="display: none;">
-        <div class="panel" style="grid-column: span 3;">
-            <h3 class="panel-title">Game Settings</h3>
-            <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap;">
-                <button class="btn-action" onclick="saveGame(true)">💾 Save Game</button>
-                <button class="btn-action btn-danger" onclick="hardReset()">⚠️ Reset All Progress</button>
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// --- Audio ---
+class AudioEngine {
+    constructor() { this.ctx = null; this.enabled = true; }
+    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); }
+    playSound(type) {
+        if (!this.enabled) return;
+        this.init();
+        const now = this.ctx.currentTime, osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        const S = {
+            click:  ['sine', [[400,0],[800,.05,1]], .15, .05],
+            meow:   ['triangle', [[300,0],[600,.15,1]], .2, .3],
+            buy:    ['square', [[523,0],[659,.08]], .1, .2],
+            golden: ['sine', [[587,0],[880,.1],[1174,.2]], .25, .4]
+        }[type];
+        if (!S) return;
+        osc.type = S[0];
+        S[1].forEach(([f, t, ramp]) => ramp ? osc.frequency.exponentialRampToValueAtTime(f, now + t) : osc.frequency.setValueAtTime(f, now + t));
+        gain.gain.setValueAtTime(S[2], now);
+        gain.gain.exponentialRampToValueAtTime(.01, now + S[3]);
+        osc.start(now); osc.stop(now + S[3]);
+    }
+}
+const audioEngine = new AudioEngine();
+
+// --- Rarities ---
+const RAR = {
+    C: { n: 'Common',    c: '#95a5a6', b: .25 },
+    U: { n: 'Uncommon',  c: '#2ecc71', b: .5 },
+    R: { n: 'Rare',      c: '#3498db', b: 1 },
+    E: { n: 'Epic',      c: '#9b59b6', b: 2.5 },
+    L: { n: 'Legendary', c: '#f39c12', b: 6 },
+    M: { n: 'Mythic',    c: '#e74c3c', b: 15 },
+    S: { n: 'Classic',   c: '#7f8c8d', b: 0 }
+};
+const RKEYS = ['C','U','R','E','L','M'];
+const TIER_SCALE = [1, 2.5, 6, 15, 35, 80, 180, 400]; // pet boost = rarity base x egg tier scale
+
+// --- Eggs: odds are [Common, Uncommon, Rare, Epic, Legendary, Mythic] in % ---
+const eggsData = [
+ { name:'Starter Egg', icon:'🥚', cost:100, odds:[60,27,10,2.7,.3,0], pets:{
+   C:'🐈 Alley Tabby,🐱 Sleepy Kitten,😺 Whiskers,🐾 Paw Pal', U:'😸 Grinning Tom,🧶 Yarn Chaser,🥛 Milk Mooch',
+   R:'🐟 Fish Thief,🌼 Garden Prowler,📦 Box Dweller', E:'🎩 Fancy Cat,🌙 Moon Mouser', L:'👑 Alley King' }},
+ { name:'Meadow Egg', icon:'🪺', cost:2500, odds:[50,28,15,5.5,1.5,0], pets:{
+   C:'🐮 Barn Cat,🌾 Hay Napper,🐭 Mouse Pal,🍎 Orchard Kitty', U:'🐓 Rooster Rival,🧀 Cheese Hunter,🌻 Sunflower Cat',
+   R:'🦋 Butterfly Chaser,🐝 Honey Bandit,🐇 Bunny Buddy', E:'🌈 Rainbow Tabby,🦌 Forest Spirit', L:'🦄 Unicorn Kitty' }},
+ { name:'Ocean Egg', icon:'🐚', cost:40000, odds:[42,28,18,9,3,0], pets:{
+   C:'🦀 Crab Pouncer,🐠 Reef Kitty,🐚 Shell Cat,🏖️ Beach Lounger', U:'🐬 Dolphin Cat,🦭 Seal Whisker,🌊 Wave Rider',
+   R:'🐙 Octo-Cat,🦈 Shark Cat,🪸 Coral Guardian', E:'🧜 Mer-Cat,⚓ Pirate Captain', L:'🐋 Leviathan Cat' }},
+ { name:'Frost Egg', icon:'🧊', cost:600000, odds:[35,28,22,11,4,0], pets:{
+   C:'⛄ Snowball,🧣 Scarf Kitty,🐧 Penguin Pal,❄️ Flurry Cat', U:'🐻‍❄️ Polar Paws,🎿 Ski Slider,☃️ Frosty',
+   R:'🦊 Arctic Fox Cat,🏔️ Peak Prowler,🧊 Ice Cube Cat', E:'🥶 Blizzard Beast,🌨️ Storm Whisker', L:'🐺 Frostfang Alpha' }},
+ { name:'Volcano Egg', icon:'🌋', cost:9000000, odds:[30,27,24,13,5,1], pets:{
+   C:'🔥 Ember Kitten,🪨 Pebble Pounce,♨️ Steam Cat', U:'🌶️ Spicy Cat,🧨 Spark Plug,🦎 Lava Lizard Cat',
+   R:'🐉 Dragonet,☄️ Meteor Cat,⚒️ Forge Cat', E:'🦅 Phoenix Kitten,😈 Imp Cat', L:'🐲 Magma Dragon Cat', M:'🌋 Inferno Overlord' }},
+ { name:'Neon Egg', icon:'🔮', cost:150000000, odds:[25,26,25,16,7,1], pets:{
+   C:'💾 Floppy Cat,🔌 Plug Pal,📟 Pixel Kitten', U:'🎮 Gamer Cat,🕹️ Arcade Cat,💿 Disc Jockey',
+   R:'🤖 Robo Cat,🦾 Mecha Paw,🛸 UFO Cat', E:'👾 Glitch Cat,🧬 Gene Splice', L:'🚀 Rocket Cat', M:'🧠 Singularity Cat' }},
+ { name:'Cosmic Egg', icon:'🌠', cost:2000000000, odds:[20,24,26,19,9.5,1.5], pets:{
+   C:'⭐ Star Speck,🌑 Moon Dust,🪐 Ringed Kitten', U:'🌙 Lunar Cat,☀️ Solar Cat,🌠 Shooting Star',
+   R:'🛰️ Satellite Cat,🌌 Nebula Cat,🔭 Stargazer', E:'🕳️ Black Hole Cat,⚡ Quasar Cat', L:'🌍 World Cat', M:'🌀 Galaxy Eater' }},
+ { name:'Heaven Egg', icon:'🔱', cost:40000000000, odds:[15,22,27,22,12,2], pets:{
+   C:'☁️ Cloud Kitty,🕊️ Dove Cat,🎶 Choir Kitten', U:'😇 Halo Cat,🪽 Wing Cat,🔔 Bell Cat',
+   R:'🏛️ Temple Guardian,📜 Oracle Cat,⚜️ Royal Cat', E:'🧚 Fairy Cat,🔱 Trident Cat', L:'👼 Seraph Cat', M:'💎 The Eternal Cat' }}
+];
+
+// --- Build the pet database from the egg data ---
+const PETS = {};
+eggsData.forEach((egg, ei) => {
+    egg.list = [];
+    RKEYS.forEach(r => {
+        (egg.pets[r] || '').split(',').filter(Boolean).forEach((s, i) => {
+            const sp = s.indexOf(' '), id = `e${ei}${r}${i}`;
+            PETS[id] = { id, icon: s.slice(0, sp), name: s.slice(sp + 1), rar: r, mult: RAR[r].b * TIER_SCALE[ei], egg: ei };
+            egg.list.push(id);
+        });
+    });
+});
+// Your original cats (kept so old saves still work; not in any egg)
+[['cat_default','🐱','House Cat',.25],['cat_calico','😸','Calico Cutie',.5],['cat_siamese','😺','Siamese Scholar',1],
+ ['cat_ninja','🥷','Ninja Cat',2.5],['cat_cyber','🤖','Cyber Cat',6],['cat_cosmic','🌌','Cosmic Feline',15]]
+ .forEach(([id, icon, name, mult]) => PETS[id] = { id, icon, name, rar: 'S', mult, egg: -1 });
+
+// --- Game State ---
+const MAX_EQUIPPED = 4;
+let state = {
+    pats: 0, totalPats: 0, manualClicks: 0, goldenCatsCaught: 0, timePlayed: 0,
+    prestigeCount: 0, goldenPaws: 0, eggsOpened: 0,
+    pets: { cat_default: 1 },      // petId -> how many you own
+    equipped: ['cat_default'],     // petIds in the 4 slots
+    upgrades: {}, achievements: {}, theme: 'light'
+};
+
+const clickUpgrades = [
+    { id:'c1', name:'Soft Glove', cost:15, power:1, icon:'🧤' },
+    { id:'c2', name:'Catnip Finger', cost:100, power:5, icon:'🌿' },
+    { id:'c3', name:'Brush of Destiny', cost:1100, power:25, icon:'🧹' },
+    { id:'c4', name:'Laser Pointer', cost:12000, power:120, icon:'🔦' },
+    { id:'c5', name:'Feather Wand Extraordinaire', cost:130000, power:800, icon:'🪶' },
+    { id:'c6', name:'Golden Scratching Post', cost:1500000, power:6000, icon:'🏆' }
+];
+const passiveUpgrades = [
+    { id:'p1', name:'Stray Friend', cost:15, pps:.5, icon:'🐈' },
+    { id:'p2', name:'Cat Treat Box', cost:100, pps:4, icon:'🐟' },
+    { id:'p3', name:'Scratching Post', cost:1100, pps:32, icon:'🪵' },
+    { id:'p4', name:'Catnip Garden', cost:12000, pps:260, icon:'🌱' },
+    { id:'p5', name:'Cat Café', cost:130000, pps:1800, icon:'☕' },
+    { id:'p6', name:'Feline Fortress', cost:1400000, pps:12500, icon:'🏰' },
+    { id:'p7', name:'Quantum Cat Lab', cost:20000000, pps:95000, icon:'🔬' }
+];
+const achievements = [
+    { id:'a1', name:'First Scratch', desc:'Click the cat 1 time.', icon:'🐾', req:() => state.manualClicks >= 1 },
+    { id:'a2', name:'Feline Enthusiast', desc:'Reach 1,000 total pats.', icon:'😸', req:() => state.totalPats >= 1000 },
+    { id:'a3', name:'Cat Collector', desc:'Discover 3 different cats.', icon:'🐈‍⬛', req:() => Object.keys(state.pets).length >= 3 },
+    { id:'a4', name:'Golden Hunter', desc:'Catch a Golden Cat.', icon:'🌟', req:() => state.goldenCatsCaught >= 1 },
+    { id:'a5', name:'Reincarnated', desc:'Reincarnate for Golden Paws.', icon:'🐾', req:() => state.prestigeCount >= 1 },
+    { id:'a6', name:'Egg Cracker', desc:'Hatch 10 eggs.', icon:'🥚', req:() => state.eggsOpened >= 10 },
+    { id:'a7', name:'Lucky Paws', desc:'Hatch a Legendary or Mythic cat.', icon:'🍀', req:() => Object.keys(state.pets).some(id => 'LM'.includes(PETS[id].rar)) },
+    { id:'a8', name:'Cat Hoarder', desc:'Discover 25 different cats.', icon:'🏠', req:() => Object.keys(state.pets).length >= 25 },
+    { id:'a9', name:'Gotta Catch Em All', desc:'Discover 100 different cats.', icon:'📖', req:() => Object.keys(state.pets).length >= 100 }
+];
+
+// --- Multipliers ---
+function getPrestigeMultiplier() { return 1 + state.goldenPaws * 0.1; }
+function getPetMultiplier() { return 1 + state.equipped.reduce((s, id) => s + (PETS[id] ? PETS[id].mult : 0), 0); }
+function calculateClickPower() {
+    let p = 1; clickUpgrades.forEach(u => p += (state.upgrades[u.id] || 0) * u.power);
+    return p * getPrestigeMultiplier() * getPetMultiplier();
+}
+function calculatePPS() {
+    let p = 0; passiveUpgrades.forEach(u => p += (state.upgrades[u.id] || 0) * u.pps);
+    return p * getPrestigeMultiplier() * getPetMultiplier();
+}
+function calculatePendingGoldenPaws() {
+    if (state.totalPats < 1e6) return 0;
+    return Math.max(0, Math.floor(Math.sqrt(state.totalPats / 1e6)) - state.goldenPaws);
+}
+
+// --- Formatting ---
+const SUF = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi'];
+function formatNumber(n, dec = 0) {
+    if (n < 1000) return dec ? n.toFixed(dec) : Math.floor(n).toLocaleString();
+    const i = Math.min(Math.floor(Math.log10(n) / 3), SUF.length - 1);
+    return (n / Math.pow(1000, i)).toFixed(2) + SUF[i];
+}
+function fmtMult(m) { return m >= 100 ? formatNumber(m) : String(+m.toFixed(2)); }
+
+// --- Clicking ---
+const catBtn = document.getElementById('cat-btn');
+catBtn.addEventListener('click', (e) => {
+    const power = calculateClickPower();
+    state.pats += power; state.totalPats += power; state.manualClicks++;
+    audioEngine.playSound('click');
+    createParticle(e.clientX, e.clientY, `+${formatNumber(power)}`);
+    updateDisplay(); checkAchievements();
+});
+function createParticle(x, y, text) {
+    const el = document.createElement('div');
+    el.className = 'click-particle'; el.innerText = text;
+    el.style.left = `${x}px`; el.style.top = `${y}px`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+}
+
+// --- Upgrades ---
+const upgCost = (u) => Math.floor(u.cost * Math.pow(1.15, state.upgrades[u.id] || 0));
+function buyUpgrade(id, type) {
+    const item = (type === 'click' ? clickUpgrades : passiveUpgrades).find(u => u.id === id);
+    const cost = upgCost(item);
+    if (state.pats >= cost) {
+        state.pats -= cost;
+        state.upgrades[id] = (state.upgrades[id] || 0) + 1;
+        audioEngine.playSound('buy');
+        renderShops(); updateDisplay();
+    }
+}
+function renderShops() {
+    const build = (list, type, effect) => list.map(u => `
+        <div class="upgrade-card" data-cost="${upgCost(u)}" onclick="buyUpgrade('${u.id}','${type}')">
+            <div class="upgrade-icon">${u.icon}</div>
+            <div class="upgrade-details">
+                <div class="upgrade-name">${u.name}</div>
+                <div class="upgrade-effect">${effect(u)}</div>
+                <div class="upgrade-cost">${formatNumber(upgCost(u))} pats</div>
             </div>
-        </div>
-    </div>
+            <div class="upgrade-count">${state.upgrades[u.id] || 0}</div>
+        </div>`).join('');
+    document.getElementById('click-upgrades-list').innerHTML = build(clickUpgrades, 'click', u => `+${u.power} per click`);
+    document.getElementById('passive-upgrades-list').innerHTML = build(passiveUpgrades, 'passive', u => `+${u.pps} pat/sec`);
+}
 
-    <div class="toast-container" id="toast-container"></div>
+// --- Eggs & Hatching ---
+function renderEggs() {
+    document.getElementById('egg-list').innerHTML = eggsData.map((e, i) => {
+        const odds = e.odds.map((o, k) => o > 0 ? `<span style="color:${RAR[RKEYS[k]].c}">${RAR[RKEYS[k]].n} ${o}%</span>` : '').join('');
+        const pets = e.list.map(id => { const p = PETS[id];
+            return `<div><span style="color:${RAR[p.rar].c}">●</span> ${p.icon} ${p.name} <span style="color:var(--gold)">+${fmtMult(p.mult)}</span></div>`; }).join('');
+        return `<div class="egg-card">
+            <div class="egg-icon">${e.icon}</div>
+            <div class="upgrade-name" style="font-size:16px">${e.name}</div>
+            <div class="odds">${odds}</div>
+            <details><summary>View ${e.list.length} pets</summary>${pets}</details>
+            <div class="egg-btns">
+                <button class="btn-action hatch-btn" data-cost="${e.cost}" onclick="hatch(${i},1)">Hatch ×1<br><small>${formatNumber(e.cost)}</small></button>
+                <button class="btn-action hatch-btn" data-cost="${e.cost * 10}" onclick="hatch(${i},10)">Hatch ×10<br><small>${formatNumber(e.cost * 10)}</small></button>
+            </div>
+        </div>`;
+    }).join('');
+}
+function rollPet(ei) {
+    const egg = eggsData[ei];
+    let r = Math.random() * 100, k = 'C';
+    for (let i = 0; i < 6; i++) { r -= egg.odds[i]; if (r < 0) { k = RKEYS[i]; break; } }
+    const pool = egg.list.filter(id => PETS[id].rar === k);
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+function hatch(ei, n) {
+    const cost = eggsData[ei].cost * n;
+    if (state.pats < cost) { showToast("Not enough pats for that egg!", '⚠️'); return; }
+    state.pats -= cost;
+    const results = [];
+    for (let i = 0; i < n; i++) {
+        const id = rollPet(ei);
+        results.push({ id, isNew: !state.pets[id] });
+        state.pets[id] = (state.pets[id] || 0) + 1;
+        if ('LM'.includes(PETS[id].rar)) showToast(`${RAR[PETS[id].rar].n}! You hatched ${PETS[id].name}!`, PETS[id].icon);
+    }
+    state.eggsOpened += n;
+    const best = results.some(r => 'LM'.includes(PETS[r.id].rar));
+    audioEngine.playSound(best ? 'golden' : 'buy');
+    results.sort((a, b) => PETS[b.id].mult - PETS[a.id].mult);
+    document.getElementById('hatch-panel').style.display = 'flex';
+    document.getElementById('hatch-results').innerHTML = results.map((r, i) =>
+        petCard(PETS[r.id], { cls: 'pop', delay: i * 0.05, isNew: r.isNew })).join('');
+    refreshPets(); checkAchievements();
+}
 
-    <script>
-        // --- Web Audio Synthesizer Engine ---
-        class AudioEngine {
-            constructor() { this.ctx = null; this.enabled = true; }
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-            playSound(type) {
-                if (!this.enabled) return;
-                this.init();
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+// --- Pet UI ---
+function petCard(p, o = {}) {
+    return `<div class="pet-card ${o.cls || ''}" style="--rc:${RAR[p.rar].c};${o.delay ? `animation-delay:${o.delay}s;` : ''}" ${o.onclick ? `onclick="${o.onclick}"` : ''}>
+        ${o.isNew ? '<span class="p-new">NEW</span>' : ''}${o.qty > 1 ? `<span class="p-qty">×${o.qty}</span>` : ''}
+        <div class="p-icon">${p.icon}</div><div class="p-name">${p.name}</div>
+        <div class="p-rar">${RAR[p.rar].n}</div><div class="p-mult">+${fmtMult(p.mult)} boost</div>
+        ${o.extra || ''}</div>`;
+}
+const equippedCount = (id) => state.equipped.filter(x => x === id).length;
+function renderEquipped() {
+    let html = '';
+    for (let i = 0; i < MAX_EQUIPPED; i++) {
+        const p = PETS[state.equipped[i]];
+        html += p ? `<div class="slot filled" style="--rc:${RAR[p.rar].c}" onclick="unequipSlot(${i})" title="Click to unequip">
+                <div class="p-icon">${p.icon}</div><div>${p.name}</div>
+                <div style="color:${RAR[p.rar].c};font-size:11px;font-weight:900">${RAR[p.rar].n}</div>
+                <div style="color:var(--gold)">+${fmtMult(p.mult)}</div></div>`
+            : `<div class="slot">＋<br>Empty slot</div>`;
+    }
+    document.getElementById('equipped-slots').innerHTML = html;
+    document.getElementById('slot-count').innerText = state.equipped.length;
+    document.getElementById('equipped-bar').innerText = state.equipped.map(id => PETS[id].icon).join(' ');
+    catBtn.innerText = state.equipped.length ? PETS[state.equipped[0]].icon : '🐱';
+}
+function renderInventory() {
+    const ids = Object.keys(state.pets).sort((a, b) => PETS[b].mult - PETS[a].mult);
+    document.getElementById('inv-count').innerText = `${ids.length}/${Object.keys(PETS).length}`;
+    document.getElementById('inv-list').innerHTML = ids.map(id => {
+        const eq = equippedCount(id);
+        return petCard(PETS[id], { cls: 'clickable', qty: state.pets[id], onclick: `equipPet('${id}')`,
+            extra: eq ? `<div style="font-size:11px;font-weight:800;color:var(--accent-main)">${eq} equipped</div>` : '' });
+    }).join('');
+}
+function refreshPets() { renderEquipped(); renderInventory(); updateDisplay(); }
+function equipPet(id) {
+    if (state.equipped.length >= MAX_EQUIPPED) { showToast('All 4 slots are full. Click a slot to unequip.', '⚠️'); return; }
+    if (equippedCount(id) >= (state.pets[id] || 0)) { showToast('You have no spare copies of that cat.', '⚠️'); return; }
+    state.equipped.push(id); audioEngine.playSound('click'); refreshPets();
+}
+function unequipSlot(i) { state.equipped.splice(i, 1); audioEngine.playSound('click'); refreshPets(); }
+function unequipAll() { state.equipped = []; refreshPets(); }
+function equipBest() {
+    const all = [];
+    Object.keys(state.pets).forEach(id => { for (let i = 0; i < state.pets[id]; i++) all.push(id); });
+    all.sort((a, b) => PETS[b].mult - PETS[a].mult);
+    state.equipped = all.slice(0, MAX_EQUIPPED);
+    audioEngine.playSound('buy'); refreshPets();
+}
 
-                if (type === 'click') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, now);
-                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                    osc.start(now); osc.stop(now + 0.05);
-                } else if (type === 'meow') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(300, now);
-                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                    osc.start(now); osc.stop(now + 0.3);
-                } else if (type === 'buy') {
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(523, now);
-                    osc.frequency.setValueAtTime(659, now + 0.08);
-                    gain.gain.setValueAtTime(0.1, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                    osc.start(now); osc.stop(now + 0.2);
-                } else if (type === 'golden') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(587, now);
-                    osc.frequency.setValueAtTime(880, now + 0.1);
-                    osc.frequency.setValueAtTime(1174, now + 0.2);
-                    gain.gain.setValueAtTime(0.25, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                    osc.start(now); osc.stop(now + 0.4);
-                }
-            }
-        }
-
-        const audioEngine = new AudioEngine();
-
-        // --- Game State ---
-        let state = {
-            pats: 0, 
-            totalPats: 0, 
-            manualClicks: 0, 
-            goldenCatsCaught: 0,
-            timePlayed: 0,
-            prestigeCount: 0, 
-            goldenPaws: 0, 
-            equippedCat: 'cat_default',
-            ownedCats: ['cat_default'],
-            upgrades: {}, 
-            achievements: {},
-            theme: 'light'
-        };
-
-        // --- Content Lists ---
-        const catsData = [
-            { id: 'cat_default', name: 'House Cat', icon: '🐱', cost: 0, mult: 1 },
-            { id: 'cat_calico', name: 'Calico Cutie', icon: '😸', cost: 500, mult: 1.5 },
-            { id: 'cat_siamese', name: 'Siamese Scholar', icon: '😺', cost: 5000, mult: 2.5 },
-            { id: 'cat_ninja', name: 'Ninja Cat', icon: '🥷', cost: 50000, mult: 5 },
-            { id: 'cat_cyber', name: 'Cyber Cat', icon: '🤖', cost: 500000, mult: 12 },
-            { id: 'cat_cosmic', name: 'Cosmic Feline', icon: '🌌', cost: 10000000, mult: 30 }
-        ];
-
-        const clickUpgrades = [
-            { id: 'c1', name: 'Soft Glove', cost: 15, power: 1, icon: '🧤' },
-            { id: 'c2', name: 'Catnip Finger', cost: 100, power: 5, icon: '🌿' },
-            { id: 'c3', name: 'Brush of Destiny', cost: 1100, power: 25, icon: '🧹' },
-            { id: 'c4', name: 'Laser Pointer', cost: 12000, power: 120, icon: '🔦' },
-            { id: 'c5', name: 'Feather Wand Extraordinaire', cost: 130000, power: 800, icon: '🪶' },
-            { id: 'c6', name: 'Golden Scratching Post', cost: 1500000, power: 6000, icon: '🏆' }
-        ];
-
-        const passiveUpgrades = [
-            { id: 'p1', name: 'Stray Friend', cost: 15, pps: 0.5, icon: '🐈' },
-            { id: 'p2', name: 'Cat Treat Box', cost: 100, pps: 4, icon: '🐟' },
-            { id: 'p3', name: 'Scratching Post', cost: 1100, pps: 32, icon: '🪵' },
-            { id: 'p4', name: 'Catnip Garden', cost: 12000, pps: 260, icon: '🌱' },
-            { id: 'p5', name: 'Cat Café', cost: 130000, pps: 1800, icon: '☕' },
-            { id: 'p6', name: 'Feline Fortress', cost: 1400000, pps: 12500, icon: '🏰' },
-            { id: 'p7', name: 'Quantum Cat Lab', cost: 20000000, pps: 95000, icon: '🔬' }
-        ];
-
-        const achievements = [
-            { id: 'a1', name: 'First Scratch', desc: 'Click the cat 1 time.', icon: '🐾', req: () => state.manualClicks >= 1 },
-            { id: 'a2', name: 'Feline Enthusiast', desc: 'Reach 1,000 total pats.', icon: '😸', req: () => state.totalPats >= 1000 },
-            { id: 'a3', name: 'Cat Collector', desc: 'Own 3 different cats.', icon: '🐈‍⬛', req: () => state.ownedCats.length >= 3 },
-            { id: 'a4', name: 'Golden Hunter', desc: 'Catch a Golden Cat.', icon: '🌟', req: () => state.goldenCatsCaught >= 1 },
-            { id: 'a5', name: 'Reincarnated', desc: 'Reincarnate for Golden Paws.', icon: '🐾', req: () => state.prestigeCount >= 1 }
-        ];
-
-        // --- Multipliers ---
-        function getPrestigeMultiplier() { return 1 + (state.goldenPaws * 0.1); }
-        function getEquippedCatMultiplier() {
-            const cat = catsData.find(c => c.id === state.equippedCat);
-            return cat ? cat.mult : 1;
-        }
-
-        function calculateClickPower() {
-            let power = 1;
-            clickUpgrades.forEach(u => { power += (state.upgrades[u.id] || 0) * u.power; });
-            return power * getPrestigeMultiplier() * getEquippedCatMultiplier();
-        }
-
-        function calculatePPS() {
-            let pps = 0;
-            passiveUpgrades.forEach(u => { pps += (state.upgrades[u.id] || 0) * u.pps; });
-            return pps * getPrestigeMultiplier();
-        }
-
-        function calculatePendingGoldenPaws() {
-            if (state.totalPats < 1000000) return 0;
-            const potentialPaws = Math.floor(Math.sqrt(state.totalPats / 1000000));
-            return Math.max(0, potentialPaws - state.goldenPaws);
-        }
-
-        // --- Click Handler ---
-        const catBtn = document.getElementById('cat-btn');
-        if (catBtn) {
-            catBtn.addEventListener('click', (e) => {
-                const power = calculateClickPower();
-                state.pats += power;
-                state.totalPats += power;
-                state.manualClicks++;
-                audioEngine.playSound('click');
-                createParticle(e.clientX, e.clientY, `+${formatNumber(power)}`);
-                updateDisplayNumbers();
-                checkAchievements();
-            });
-        }
-
-        function createParticle(x, y, text) {
-            const el = document.createElement('div');
-            el.className = 'click-particle';
-            el.innerText = text;
-            el.style.left = `${x}px`;
-            el.style.top = `${y}px`;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
-        }
-
-        // --- Purchasing & Equipping ---
-        function buyUpgrade(id, type) {
-            const list = type === 'click' ? clickUpgrades : passiveUpgrades;
-            const item = list.find(u => u.id === id);
-            const count = state.upgrades[id] || 0;
-            const cost = Math.floor(item.cost * Math.pow(1.15, count));
-
-            if (state.pats >= cost) {
-                state.pats -= cost;
-                state.upgrades[id] = count + 1;
-                audioEngine.playSound('buy');
-                updateDisplayNumbers();
-                renderShops();
-            }
-        }
-
-        function buyCat(catId) {
-            const cat = catsData.find(c => c.id === catId);
-            if (!cat) return;
-
-            const isOwned = state.ownedCats.includes(catId);
-
-            if (!isOwned) {
-                if (state.pats >= cat.cost) {
-                    state.pats -= cat.cost;
-                    state.ownedCats.push(catId);
-                    state.equippedCat = catId;
-                    audioEngine.playSound('buy');
-                    showToast(`Adopted ${cat.name}!`, cat.icon);
-                }
-            } else {
-                state.equippedCat = catId;
-                audioEngine.playSound('click');
-            }
-
-            updateDisplayNumbers();
-            renderCats();
-        }
-
-        // --- Render UI Elements ---
-        function renderShops() {
-            const clickContainer = document.getElementById('click-upgrades-list');
-            if (clickContainer) {
-                clickContainer.innerHTML = '';
-                clickUpgrades.forEach(u => {
-                    const count = state.upgrades[u.id] || 0;
-                    const cost = Math.floor(u.cost * Math.pow(1.15, count));
-                    const disabled = state.pats < cost ? 'disabled' : '';
-                    clickContainer.innerHTML += `
-                        <div class="upgrade-card ${disabled}" onclick="buyUpgrade('${u.id}', 'click')">
-                            <div class="upgrade-icon">${u.icon}</div>
-                            <div class="upgrade-details">
-                                <div class="upgrade-name">${u.name}</div>
-                                <div class="upgrade-effect">+${u.power} per click</div>
-                                <div class="upgrade-cost">${formatNumber(cost)} pats</div>
-                            </div>
-                            <div class="upgrade-count">${count}</div>
-                        </div>`;
-                });
-            }
-
-            const passiveContainer = document.getElementById('passive-upgrades-list');
-            if (passiveContainer) {
-                passiveContainer.innerHTML = '';
-                passiveUpgrades.forEach(u => {
-                    const count = state.upgrades[u.id] || 0;
-                    const cost = Math.floor(u.cost * Math.pow(1.15, count));
-                    const disabled = state.pats < cost ? 'disabled' : '';
-                    passiveContainer.innerHTML += `
-                        <div class="upgrade-card ${disabled}" onclick="buyUpgrade('${u.id}', 'passive')">
-                            <div class="upgrade-icon">${u.icon}</div>
-                            <div class="upgrade-details">
-                                <div class="upgrade-name">${u.name}</div>
-                                <div class="upgrade-effect">+${u.pps} pat/sec</div>
-                                <div class="upgrade-cost">${formatNumber(cost)} pats</div>
-                            </div>
-                            <div class="upgrade-count">${count}</div>
-                        </div>`;
-                });
-            }
-        }
-
-        function renderCats() {
-            const container = document.getElementById('cats-list');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const currentCat = catsData.find(c => c.id === state.equippedCat);
-            if (currentCat && catBtn) catBtn.innerText = currentCat.icon;
-
-            catsData.forEach(c => {
-                const isOwned = state.ownedCats.includes(c.id);
-                const isEquipped = state.equippedCat === c.id;
-                const canAfford = state.pats >= c.cost;
-
-                let btnText = isEquipped ? 'Equipped' : (isOwned ? 'Equip' : `Adopt (${formatNumber(c.cost)})`);
-                let btnDisabled = (!isOwned && !canAfford) || isEquipped;
-
-                container.innerHTML += `
-                    <div class="cat-card ${isEquipped ? 'equipped' : ''}">
-                        <div class="cat-avatar">${c.icon}</div>
-                        <div class="cat-title">${c.name}</div>
-                        <div class="cat-mult">${c.mult}x Click Multiplier</div>
-                        <button class="btn-action ${btnDisabled ? 'disabled' : ''}" 
-                                style="width:100%; margin-top:8px;" 
-                                ${btnDisabled ? 'disabled' : ''} 
-                                onclick="buyCat('${c.id}')">${btnText}</button>
-                    </div>`;
-            });
-        }
-
-        function renderAchievements() {
-            const container = document.getElementById('achievements-list');
-            if (container) {
-                container.innerHTML = '';
-                achievements.forEach(a => {
-                    const unlocked = state.achievements[a.id] ? 'unlocked' : '';
-                    container.innerHTML += `<div class="achievement-badge ${unlocked}" title="${a.name}: ${a.desc}">${a.icon}</div>`;
-                });
-            }
-        }
-
-        // --- Fast Display Updates (Prevents Flickering) ---
-        function updateDisplayNumbers() {
-            document.getElementById('pat-count').innerText = formatNumber(Math.floor(state.pats));
-            document.getElementById('pps-count').innerText = formatNumber(calculatePPS().toFixed(1));
-            document.getElementById('click-power-display').innerText = `Power: ${formatNumber(calculateClickPower())}`;
-            document.getElementById('prestige-mult').innerText = `${getPrestigeMultiplier().toFixed(1)}x`;
-
-            document.getElementById('stat-total-pats').innerText = formatNumber(Math.floor(state.totalPats));
-            document.getElementById('stat-clicks').innerText = formatNumber(state.manualClicks);
-            document.getElementById('stat-golden').innerText = state.goldenCatsCaught;
-            document.getElementById('stat-time').innerText = `${Math.floor(state.timePlayed)}s`;
-            document.getElementById('stat-prestige').innerText = state.prestigeCount;
-
-            document.getElementById('current-paws').innerText = state.goldenPaws;
-            document.getElementById('pending-paws').innerText = calculatePendingGoldenPaws();
-            
-            // Check upgrade cards disabled state without rebuilding full HTML (prevents flickering)
-            updateCardAffordability();
-        }
-
-        function updateCardAffordability() {
-            document.querySelectorAll('.upgrade-card').forEach((card, idx) => {
-                const isClick = idx < clickUpgrades.length;
-                const item = isClick ? clickUpgrades[idx] : passiveUpgrades[idx - clickUpgrades.length];
-                const count = state.upgrades[item.id] || 0;
-                const cost = Math.floor(item.cost * Math.pow(1.15, count));
-                
-                if (state.pats < cost) {
-                    card.classList.add('disabled');
-                } else {
-                    card.classList.remove('disabled');
-                }
-            });
-        }
-
-        // --- Golden Cat Mini-Game ---
-        function spawnGoldenCat() {
-            const golden = document.createElement('div');
-            golden.className = 'golden-cat';
-            golden.innerText = '🌟🐱';
-            golden.style.top = `${Math.random() * (window.innerHeight - 120) + 60}px`;
-            golden.style.left = `${Math.random() * (window.innerWidth - 120) + 60}px`;
-
-            golden.onclick = () => {
-                const bonus = Math.max(100, Math.floor(calculatePPS() * 30 + calculateClickPower() * 20));
-                state.pats += bonus;
-                state.totalPats += bonus;
-                state.goldenCatsCaught++;
-                audioEngine.playSound('golden');
-                showToast(`Golden Cat Caught! +${formatNumber(bonus)} Pats!`, '🌟');
-                golden.remove();
-                updateDisplayNumbers();
-                checkAchievements();
-            };
-
-            document.body.appendChild(golden);
-            setTimeout(() => { if (golden.parentNode) golden.remove(); }, 8000);
-        }
-
-        setInterval(() => {
-            if (Math.random() < 0.35) spawnGoldenCat();
-        }, 45000);
-
-        // --- Main Game Loop ---
-        setInterval(() => {
-            const pps = calculatePPS();
-            state.pats += pps / 10;
-            state.totalPats += pps / 10;
-            state.timePlayed += 0.1;
-            updateDisplayNumbers();
-            checkAchievements();
-        }, 100);
-
-        setInterval(() => saveGame(false), 30000);
-
-        // --- Reincarnation (Prestige) ---
-        function doPrestige() {
-            const pendingPaws = calculatePendingGoldenPaws();
-            if (pendingPaws <= 0) { 
-                alert("You need at least 1,000,000 Total Pats to earn your next Golden Paw!"); 
-                return; 
-            }
-
-            if (confirm(`Reincarnate now for +${pendingPaws} Golden Paws?\n\nThis will reset your Pats and Buildings, but your Golden Paws and Owned Cats will remain!`)) {
-                state.goldenPaws += pendingPaws;
-                state.prestigeCount++;
-                state.pats = 0;
-                state.upgrades = {};
-                saveGame(true);
-                renderShops();
-                renderCats();
-                updateDisplayNumbers();
-                showToast("Reincarnated successfully!", "🐾");
-            }
-        }
-
-        // --- UI & Navigation ---
-        function toggleMute() {
-            audioEngine.enabled = !audioEngine.enabled;
-            document.getElementById('mute-btn').innerText = audioEngine.enabled ? '🔊' : '🔇';
-        }
-
-        function toggleTheme() {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', state.theme);
-            document.getElementById('theme-btn').innerText = state.theme === 'light' ? '🌙' : '☀️';
-        }
-
-        function switchTab(tabId, evt) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('game-tab').style.display = 'none';
-            document.getElementById('cats-tab').style.display = 'none';
-            document.getElementById('stats-tab').style.display = 'none';
-            document.getElementById('prestige-tab').style.display = 'none';
-            document.getElementById('settings-tab').style.display = 'none';
-
-            document.getElementById(`${tabId}-tab`).style.display = 'grid';
-            if (evt && evt.target) evt.target.classList.add('active');
-
-            // Render active tab contents on tab switch
-            if (tabId === 'cats') renderCats();
-            if (tabId === 'stats') renderAchievements();
-            if (tabId === 'game') renderShops();
-        }
-
-        function checkAchievements() {
-            achievements.forEach(a => {
-                if (!state.achievements[a.id] && a.req()) {
-                    state.achievements[a.id] = true;
-                    showToast(`Achievement Unlocked: ${a.name}!`, a.icon);
-                    renderAchievements();
-                }
-            });
-        }
-
-        function showToast(text, icon = '🏆') {
-            const container = document.getElementById('toast-container');
-            if (!container) return;
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `<span style="font-size:24px;">${icon}</span> <span>${text}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
-        }
-
-        function saveGame(manual = false) {
-            localStorage.setItem('catClickerDeluxeSave', JSON.stringify(state));
-            if (manual) showToast("Game Saved Successfully!", "💾");
-        }
-
-        function loadGame() {
-            const saved = localStorage.getItem('catClickerDeluxeSave');
-            if (saved) {
-                try { state = { ...state, ...JSON.parse(saved) }; } catch (e) {}
-            }
-            if (state.theme) {
-                document.documentElement.setAttribute('data-theme', state.theme);
-                document.getElementById('theme-btn').innerText = state.theme === 'light' ? '🌙' : '☀️';
-            }
-            renderShops();
-            renderCats();
+// --- Achievements ---
+function renderAchievements() {
+    document.getElementById('achievements-list').innerHTML = achievements.map(a =>
+        `<div class="achievement-badge ${state.achievements[a.id] ? 'unlocked' : ''}" title="${a.name}: ${a.desc}">${a.icon}</div>`).join('');
+}
+function checkAchievements() {
+    achievements.forEach(a => {
+        if (!state.achievements[a.id] && a.req()) {
+            state.achievements[a.id] = true;
+            showToast(`Achievement Unlocked: ${a.name}!`, a.icon);
             renderAchievements();
-            updateDisplayNumbers();
         }
+    });
+}
 
-        function hardReset() {
-            if (confirm("Are you sure? This will permanently delete ALL progress!")) {
-                localStorage.removeItem
+// --- Display (numbers only, no rebuilding, so buttons never flicker) ---
+const $ = (id) => document.getElementById(id);
+function updateDisplay() {
+    $('pat-count').innerText = formatNumber(Math.floor(state.pats));
+    $('pps-count').innerText = formatNumber(calculatePPS(), 1);
+    $('click-power-display').innerText = `Power: ${formatNumber(calculateClickPower())}`;
+    $('prestige-mult').innerText = `${getPrestigeMultiplier().toFixed(1)}x`;
+    $('pet-mult').innerText = $('pet-mult2').innerText = `${fmtMult(getPetMultiplier())}x`;
+    $('stat-total-pats').innerText = formatNumber(Math.floor(state.totalPats));
+    $('stat-clicks').innerText = formatNumber(state.manualClicks);
+    $('stat-golden').innerText = state.goldenCatsCaught;
+    $('stat-eggs').innerText = formatNumber(state.eggsOpened);
+    $('stat-time').innerText = `${Math.floor(state.timePlayed)}s`;
+    $('stat-prestige').innerText = state.prestigeCount;
+    $('current-paws').innerText = state.goldenPaws;
+    $('pending-paws').innerText = calculatePendingGoldenPaws();
+    document.querySelectorAll('[data-cost]').forEach(el => el.classList.toggle('disabled', state.pats < +el.dataset.cost));
+}
+
+// --- Golden Cat ---
+function spawnGoldenCat() {
+    const g = document.createElement('div');
+    g.className = 'golden-cat'; g.innerText = '🌟🐱';
+    g.style.top = `${Math.random() * (window.innerHeight - 120) + 60}px`;
+    g.style.left = `${Math.random() * (window.innerWidth - 120) + 60}px`;
+    g.onclick = () => {
+        const bonus = Math.max(100, Math.floor(calculatePPS() * 30 + calculateClickPower() * 20));
+        state.pats += bonus; state.totalPats += bonus; state.goldenCatsCaught++;
+        audioEngine.playSound('golden');
+        showToast(`Golden Cat Caught! +${formatNumber(bonus)} Pats!`, '🌟');
+        g.remove(); updateDisplay(); checkAchievements();
+    };
+    document.body.appendChild(g);
+    setTimeout(() => g.remove(), 8000);
+}
+setInterval(() => { if (Math.random() < 0.35) spawnGoldenCat(); }, 45000);
+
+// --- Game loop ---
+setInterval(() => {
+    const pps = calculatePPS();
+    state.pats += pps / 10; state.totalPats += pps / 10; state.timePlayed += 0.1;
+    updateDisplay(); checkAchievements();
+}, 100);
+setInterval(() => saveGame(false), 30000);
+
+// --- Reincarnation (pets are kept) ---
+function doPrestige() {
+    const pending = calculatePendingGoldenPaws();
+    if (pending <= 0) { alert("You need at least 1,000,000 Total Pats to earn your next Golden Paw!"); return; }
+    if (confirm(`Reincarnate now for +${pending} Golden Paws?\n\nThis resets your Pats and Buildings. Golden Paws and all your pets stay!`)) {
+        state.goldenPaws += pending; state.prestigeCount++;
+        state.pats = 0; state.upgrades = {};
+        saveGame(true); renderShops(); updateDisplay();
+        showToast("Reincarnated successfully!", "🐾");
+    }
+}
+
+// --- UI ---
+function toggleMute() {
+    audioEngine.enabled = !audioEngine.enabled;
+    $('mute-btn').innerText = audioEngine.enabled ? '🔊' : '🔇';
+}
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', state.theme);
+    $('theme-btn').innerText = state.theme === 'light' ? '🌙' : '☀️';
+}
+function toggleTheme() {
+    state.theme = state.theme === 'light' ? 'dark' : 'light';
+    applyTheme(); saveGame(false);
+}
+function switchTab(tabId, evt) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    ['game', 'cats', 'stats', 'prestige', 'settings'].forEach(t => $(`${t}-tab`).style.display = 'none');
+    $(`${tabId}-tab`).style.display = 'grid';
+    if (evt && evt.target) evt.target.classList.add('active');
+    if (tabId === 'cats') { renderEquipped(); renderInventory(); }
+    if (tabId === 'stats') renderAchievements();
+    updateDisplay();
+}
+function showToast(text, icon = '🏆') {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<span style="font-size:24px">${icon}</span> <span>${text}</span>`;
+    $('toast-container').appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+}
+
+// --- Save / Load ---
+function saveGame(manual = false) {
+    try { localStorage.setItem('catClickerDeluxeSave', JSON.stringify(state)); } catch (e) {}
+    if (manual) showToast("Game Saved Successfully!", "💾");
+}
+function loadGame() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('catClickerDeluxeSave')); } catch (e) {}
+    if (saved) {
+        // Upgrade old saves (owned cats -> pet inventory)
+        if (!saved.pets && saved.ownedCats) {
+            saved.pets = {}; saved.ownedCats.forEach(id => saved.pets[id] = 1);
+            saved.equipped = saved.equippedCat ? [saved.equippedCat] : [];
+        }
+        delete saved.ownedCats; delete saved.equippedCat;
+        state = { ...state, ...saved };
+    } else if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) {
+        state.theme = 'dark';
+    }
+    // Clean up anything invalid
+    Object.keys(state.pets).forEach(id => { if (!PETS[id]) delete state.pets[id]; });
+    if (!Object.keys(state.pets).length) state.pets = { cat_default: 1 };
+    const left = { ...state.pets };
+    state.equipped = (state.equipped || []).filter(id => left[id] > 0 && left[id]--).slice(0, MAX_EQUIPPED);
+    applyTheme(); renderEggs(); renderShops(); renderEquipped(); renderInventory(); renderAchievements(); updateDisplay();
+}
+function hardReset() {
+    if (confirm("Are you sure? This will permanently delete ALL progress!")) {
+        localStorage.removeItem('catClickerDeluxeSave');
+        location.reload();
+    }
+}
+
+window.addEventListener('DOMContentLoaded', loadGame);
+</script>
+</body>
+</html>
