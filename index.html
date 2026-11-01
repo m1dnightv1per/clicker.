@@ -236,13 +236,12 @@
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1) translateY(-80px); }
         }
 
-        /* Golden Cat Mini Game */
         .golden-cat {
             position: fixed;
             font-size: 60px;
             cursor: pointer;
             z-index: 999;
-            animation: goldenPulse 0.6s infinite alternate, floatGolden 3s infinite ease-in-out;
+            animation: goldenPulse 0.6s infinite alternate;
             filter: drop-shadow(0 0 15px #f1c40f);
         }
 
@@ -259,7 +258,7 @@
             align-items: center;
             gap: 12px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
             border: 2px solid transparent;
         }
 
@@ -294,7 +293,7 @@
 
         .cat-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 16px;
         }
 
@@ -376,10 +375,11 @@
             border-radius: 10px;
             font-weight: 800;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, transform 0.1s ease;
         }
 
-        .btn-action:hover { background: var(--accent-hover); }
+        .btn-action:hover:not(.disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-action.disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
         .btn-danger { background: #e74c3c; }
         .btn-gold { background: var(--gold); }
 
@@ -609,11 +609,8 @@
             { id: 'a5', name: 'Reincarnated', desc: 'Reincarnate for Golden Paws.', icon: '🐾', req: () => state.prestigeCount >= 1 }
         ];
 
-        // --- Multiplier & Calculation Logic ---
-        function getPrestigeMultiplier() { 
-            return 1 + (state.goldenPaws * 0.1); 
-        }
-
+        // --- Multipliers ---
+        function getPrestigeMultiplier() { return 1 + (state.goldenPaws * 0.1); }
         function getEquippedCatMultiplier() {
             const cat = catsData.find(c => c.id === state.equippedCat);
             return cat ? cat.mult : 1;
@@ -647,7 +644,7 @@
                 state.manualClicks++;
                 audioEngine.playSound('click');
                 createParticle(e.clientX, e.clientY, `+${formatNumber(power)}`);
-                updateDisplay();
+                updateDisplayNumbers();
                 checkAchievements();
             });
         }
@@ -662,17 +659,18 @@
             setTimeout(() => el.remove(), 800);
         }
 
-        // --- Upgrade Purchase Systems ---
+        // --- Purchasing & Equipping ---
         function buyUpgrade(id, type) {
             const list = type === 'click' ? clickUpgrades : passiveUpgrades;
             const item = list.find(u => u.id === id);
             const count = state.upgrades[id] || 0;
             const cost = Math.floor(item.cost * Math.pow(1.15, count));
+
             if (state.pats >= cost) {
                 state.pats -= cost;
                 state.upgrades[id] = count + 1;
                 audioEngine.playSound('buy');
-                updateDisplay();
+                updateDisplayNumbers();
                 renderShops();
             }
         }
@@ -681,7 +679,9 @@
             const cat = catsData.find(c => c.id === catId);
             if (!cat) return;
 
-            if (!state.ownedCats.includes(catId)) {
+            const isOwned = state.ownedCats.includes(catId);
+
+            if (!isOwned) {
                 if (state.pats >= cat.cost) {
                     state.pats -= cat.cost;
                     state.ownedCats.push(catId);
@@ -693,11 +693,12 @@
                 state.equippedCat = catId;
                 audioEngine.playSound('click');
             }
-            updateDisplay();
+
+            updateDisplayNumbers();
             renderCats();
         }
 
-        // --- Render Functions ---
+        // --- Render UI Elements ---
         function renderShops() {
             const clickContainer = document.getElementById('click-upgrades-list');
             if (clickContainer) {
@@ -754,15 +755,16 @@
                 const canAfford = state.pats >= c.cost;
 
                 let btnText = isEquipped ? 'Equipped' : (isOwned ? 'Equip' : `Adopt (${formatNumber(c.cost)})`);
-                let cardClass = isEquipped ? 'cat-card equipped' : 'cat-card';
+                let btnDisabled = (!isOwned && !canAfford) || isEquipped;
 
                 container.innerHTML += `
-                    <div class="${cardClass}">
+                    <div class="cat-card ${isEquipped ? 'equipped' : ''}">
                         <div class="cat-avatar">${c.icon}</div>
                         <div class="cat-title">${c.name}</div>
                         <div class="cat-mult">${c.mult}x Click Multiplier</div>
-                        <button class="btn-action ${!isOwned && !canAfford ? 'disabled' : ''}" 
+                        <button class="btn-action ${btnDisabled ? 'disabled' : ''}" 
                                 style="width:100%; margin-top:8px;" 
+                                ${btnDisabled ? 'disabled' : ''} 
                                 onclick="buyCat('${c.id}')">${btnText}</button>
                     </div>`;
             });
@@ -779,7 +781,8 @@
             }
         }
 
-        function updateDisplay() {
+        // --- Fast Display Updates (Prevents Flickering) ---
+        function updateDisplayNumbers() {
             document.getElementById('pat-count').innerText = formatNumber(Math.floor(state.pats));
             document.getElementById('pps-count').innerText = formatNumber(calculatePPS().toFixed(1));
             document.getElementById('click-power-display').innerText = `Power: ${formatNumber(calculateClickPower())}`;
@@ -793,9 +796,24 @@
 
             document.getElementById('current-paws').innerText = state.goldenPaws;
             document.getElementById('pending-paws').innerText = calculatePendingGoldenPaws();
+            
+            // Check upgrade cards disabled state without rebuilding full HTML (prevents flickering)
+            updateCardAffordability();
+        }
 
-            renderShops();
-            renderCats();
+        function updateCardAffordability() {
+            document.querySelectorAll('.upgrade-card').forEach((card, idx) => {
+                const isClick = idx < clickUpgrades.length;
+                const item = isClick ? clickUpgrades[idx] : passiveUpgrades[idx - clickUpgrades.length];
+                const count = state.upgrades[item.id] || 0;
+                const cost = Math.floor(item.cost * Math.pow(1.15, count));
+                
+                if (state.pats < cost) {
+                    card.classList.add('disabled');
+                } else {
+                    card.classList.remove('disabled');
+                }
+            });
         }
 
         // --- Golden Cat Mini-Game ---
@@ -814,7 +832,7 @@
                 audioEngine.playSound('golden');
                 showToast(`Golden Cat Caught! +${formatNumber(bonus)} Pats!`, '🌟');
                 golden.remove();
-                updateDisplay();
+                updateDisplayNumbers();
                 checkAchievements();
             };
 
@@ -832,7 +850,7 @@
             state.pats += pps / 10;
             state.totalPats += pps / 10;
             state.timePlayed += 0.1;
-            updateDisplay();
+            updateDisplayNumbers();
             checkAchievements();
         }, 100);
 
@@ -852,12 +870,14 @@
                 state.pats = 0;
                 state.upgrades = {};
                 saveGame(true);
-                updateDisplay();
+                renderShops();
+                renderCats();
+                updateDisplayNumbers();
                 showToast("Reincarnated successfully!", "🐾");
             }
         }
 
-        // --- UI & Controls ---
+        // --- UI & Navigation ---
         function toggleMute() {
             audioEngine.enabled = !audioEngine.enabled;
             document.getElementById('mute-btn').innerText = audioEngine.enabled ? '🔊' : '🔇';
@@ -879,6 +899,11 @@
 
             document.getElementById(`${tabId}-tab`).style.display = 'grid';
             if (evt && evt.target) evt.target.classList.add('active');
+
+            // Render active tab contents on tab switch
+            if (tabId === 'cats') renderCats();
+            if (tabId === 'stats') renderAchievements();
+            if (tabId === 'game') renderShops();
         }
 
         function checkAchievements() {
@@ -915,25 +940,12 @@
                 document.documentElement.setAttribute('data-theme', state.theme);
                 document.getElementById('theme-btn').innerText = state.theme === 'light' ? '🌙' : '☀️';
             }
+            renderShops();
+            renderCats();
             renderAchievements();
-            updateDisplay();
+            updateDisplayNumbers();
         }
 
         function hardReset() {
             if (confirm("Are you sure? This will permanently delete ALL progress!")) {
-                localStorage.removeItem('catClickerDeluxeSave');
-                location.reload();
-            }
-        }
-
-        function formatNumber(num) {
-            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
-            return Math.floor(num).toLocaleString();
-        }
-
-        window.addEventListener('DOMContentLoaded', () => { loadGame(); });
-    </script>
-</body>
-</html>
+                localStorage.removeItem
