@@ -8,6 +8,7 @@
 :root{--bg-primary:#fce4ec;--bg-secondary:#f8bbd0;--card-bg:rgba(255,255,255,.9);--text-dark:#2c3e50;--text-light:#7f8c8d;--accent-main:#ec407a;--accent-hover:#d81b60;--gold:#f39c12;--shadow:0 12px 32px rgba(0,0,0,.1);--border-radius:20px}
 [data-theme="dark"]{--bg-primary:#1a1a2e;--bg-secondary:#16213e;--card-bg:rgba(30,30,50,.9);--text-dark:#e0e0e0;--text-light:#a0a0a0;--accent-main:#ff4081;--accent-hover:#f50057;--shadow:0 12px 32px rgba(0,0,0,.5)}
 *{box-sizing:border-box;user-select:none;-webkit-user-select:none}
+input{user-select:text;-webkit-user-select:text}
 body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:linear-gradient(135deg,var(--bg-primary),var(--bg-secondary));color:var(--text-dark);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;transition:background .3s,color .3s}
 header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
 .logo-title{display:flex;align-items:center;gap:12px;font-size:24px;font-weight:900;color:var(--accent-main)}
@@ -34,14 +35,16 @@ header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:
 .golden-cat{position:fixed;font-size:60px;cursor:pointer;z-index:999;animation:goldenPulse .6s infinite alternate;filter:drop-shadow(0 0 15px #f1c40f)}
 @keyframes goldenPulse{0%{transform:scale(1)}100%{transform:scale(1.25)}}
 .upgrade-card{background:rgba(0,0,0,.03);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;border:2px solid transparent;margin-bottom:10px}
-.upgrade-card:hover:not(.disabled){transform:translateY(-2px);border-color:var(--accent-main);background:rgba(0,0,0,.06)}
+.upgrade-card:hover:not(.disabled):not(.owned){transform:translateY(-2px);border-color:var(--accent-main);background:rgba(0,0,0,.06)}
 .upgrade-card.disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.8)}
-.upgrade-icon{font-size:30px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:var(--card-bg);border-radius:10px}
+.upgrade-card.owned{border-color:var(--gold);background:rgba(241,196,15,.12);cursor:default}
+.upgrade-icon{font-size:30px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:var(--card-bg);border-radius:10px;flex-shrink:0}
 .upgrade-details{flex:1}
 .upgrade-name{font-weight:800;font-size:14px;margin:0 0 2px}
 .upgrade-effect{font-size:11px;color:var(--text-light);margin:0 0 3px}
 .upgrade-cost{font-weight:800;color:var(--accent-main);font-size:12px}
 .upgrade-count{font-size:18px;font-weight:900;color:var(--text-light)}
+.boost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0 14px}
 .achievements-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:12px}
 .achievement-badge{aspect-ratio:1;background:rgba(0,0,0,.03);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3;filter:grayscale(1);border:2px dashed var(--text-light)}
 .achievement-badge.unlocked{opacity:1;filter:grayscale(0);border:2px solid var(--gold);background:rgba(241,196,15,.15)}
@@ -54,7 +57,7 @@ header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:
 .btn-danger{background:#e74c3c}
 .btn-gold{background:var(--gold)}
 .btn-ghost{background:transparent;border:2px solid var(--accent-main);color:var(--accent-main)}
-.btn-ghost:hover:not(.disabled){background:var(--accent-main);color:#fff}
+.btn-ghost:hover:not(.disabled),.btn-ghost.active{background:var(--accent-main);color:#fff}
 .stats-list{display:flex;flex-direction:column;gap:10px}
 .stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(150,150,150,.1);font-weight:600}
 
@@ -87,6 +90,18 @@ header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:
 .pet-card .p-new{position:absolute;top:4px;left:8px;font-weight:900;font-size:11px;color:#fff;background:#e74c3c;border-radius:6px;padding:1px 5px}
 .pet-card.pop{animation:pop .45s ease-out backwards}
 @keyframes pop{0%{transform:scale(.2) rotate(-12deg);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+
+/* Leaderboard + username */
+.lb-row{display:grid;grid-template-columns:50px 1fr 120px 110px 100px;gap:8px;padding:8px 12px;border-radius:10px;align-items:center;font-weight:700;font-size:14px;border:2px solid transparent}
+.lb-row:nth-child(even){background:rgba(0,0,0,.03)}
+.lb-row.me{background:rgba(241,196,15,.18);border-color:var(--gold)}
+.lb-head{color:var(--text-light);font-size:12px;background:none!important}
+.lb-note{background:rgba(0,0,0,.04);border-radius:12px;padding:14px;font-size:14px;line-height:1.5}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
+.modal-box{background:var(--bg-primary);color:var(--text-dark);border-radius:20px;padding:28px;max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.modal-box input{padding:12px;border-radius:10px;border:2px solid var(--accent-main);font-size:16px;text-align:center;background:var(--card-bg);color:var(--text-dark)}
+.err{color:#e74c3c;font-weight:700;font-size:13px;min-height:16px}
+@media (max-width:700px){.lb-row{grid-template-columns:36px 1fr 90px 70px;font-size:12px}.lb-row span:nth-child(5){display:none}}
 @media (max-width:1100px){.app-container{grid-template-columns:1fr;max-width:650px}.panel{max-height:none}.slots{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -97,6 +112,8 @@ header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('game', event)">Game</button>
         <button class="tab-btn" onclick="switchTab('cats', event)">Cat Alley</button>
+        <button class="tab-btn" onclick="switchTab('boosts', event)">Boosts</button>
+        <button class="tab-btn" onclick="switchTab('leaderboard', event)">Leaderboard</button>
         <button class="tab-btn" onclick="switchTab('stats', event)">Stats & Badges</button>
         <button class="tab-btn" onclick="switchTab('prestige', event)">Reincarnate</button>
         <button class="tab-btn" onclick="switchTab('settings', event)">Settings</button>
@@ -157,6 +174,33 @@ header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:
     </div>
 </div>
 
+<!-- Boosts Tab -->
+<div class="app-container one-col" id="boosts-tab" style="display:none">
+    <div class="panel">
+        <h3 class="panel-title"><span>⚡ Boosts</span><span style="font-size:13px;color:var(--text-light)">One-time multipliers. They reset when you reincarnate.</span></h3>
+        <div class="boost-grid" id="boost-list"></div>
+    </div>
+</div>
+
+<!-- Leaderboard Tab -->
+<div class="app-container one-col" id="leaderboard-tab" style="display:none">
+    <div class="panel">
+        <h3 class="panel-title">
+            <span>🏆 Global Leaderboard</span>
+            <span style="font-size:14px">You: <b id="lb-name">Not set</b>
+                <button class="btn-action btn-ghost" style="padding:4px 10px;margin-left:6px" onclick="openNameModal()">Change</button></span>
+        </h3>
+        <div class="row-btns">
+            <span style="font-size:13px;font-weight:700">Rank by:</span>
+            <button class="btn-action btn-ghost active" data-lb="totalPats" onclick="setLbField('totalPats')">Total Pats</button>
+            <button class="btn-action btn-ghost" data-lb="goldenPaws" onclick="setLbField('goldenPaws')">Golden Paws</button>
+            <button class="btn-action btn-ghost" data-lb="petMult" onclick="setLbField('petMult')">Pet Boost</button>
+            <button class="btn-action btn-ghost" onclick="submitScore().then(loadLeaderboard)">🔄 Refresh</button>
+        </div>
+        <div id="lb-list"></div>
+    </div>
+</div>
+
 <!-- Stats Tab -->
 <div class="app-container" id="stats-tab" style="display:none">
     <div class="panel">
@@ -180,7 +224,7 @@ header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:
 <div class="app-container" id="prestige-tab" style="display:none">
     <div class="panel" style="grid-column:span 3;text-align:center">
         <h2 style="color:var(--gold);font-size:28px">🐾 Golden Paw Reincarnation 🐾</h2>
-        <p>Ascend your empire! Reset your pats and buildings to receive permanent <b>Golden Paws</b>.</p>
+        <p>Ascend your empire! Reset your pats, buildings and boosts to receive permanent <b>Golden Paws</b>.</p>
         <p style="font-size:14px;color:var(--text-light)">Each Golden Paw grants a permanent <b>+10% production bonus</b> to all clicks and passive income. Your pets stay with you!</p>
         <div style="margin:30px 0">
             <h3 style="font-size:20px">Current Golden Paws: <span style="color:var(--gold)" id="current-paws">0</span></h3>
@@ -197,14 +241,36 @@ header{background:var(--card-bg);padding:14px 28px;display:flex;justify-content:
         <div style="display:flex;gap:15px;margin-top:15px;flex-wrap:wrap">
             <button class="btn-action" onclick="saveGame(true)">💾 Save Game</button>
             <button class="btn-action btn-ghost" onclick="toggleTheme()">🌗 Light / Dark Mode</button>
+            <button class="btn-action btn-ghost" onclick="openNameModal()">✏️ Change Username</button>
             <button class="btn-action btn-danger" onclick="hardReset()">⚠️ Reset All Progress</button>
         </div>
+    </div>
+</div>
+
+<!-- Username popup -->
+<div class="modal" id="name-modal">
+    <div class="modal-box">
+        <div style="font-size:48px">🐱</div>
+        <h2 style="margin:0">Pick a username</h2>
+        <div style="font-size:13px;color:var(--text-light)">This is how you'll appear on the public leaderboard. 3–16 characters: letters, numbers, _ or -</div>
+        <input id="name-input" maxlength="16" placeholder="e.g. CatLord99" autocomplete="off" onkeydown="if(event.key==='Enter')saveName()">
+        <div class="err" id="name-error"></div>
+        <button class="btn-action" onclick="saveName()">Save &amp; Play</button>
+        <button class="btn-action btn-ghost" onclick="skipName()">Skip for now</button>
     </div>
 </div>
 
 <div class="toast-container" id="toast-container"></div>
 
 <script>
+// ================= LEADERBOARD SETUP =================
+// Paste your Firebase values here (see setup steps). Leave empty to play without a global leaderboard.
+const FB = {
+    apiKey: '',        // e.g. 'AIzaSy...'
+    databaseURL: ''    // e.g. 'https://your-project-default-rtdb.firebaseio.com'
+};
+// =====================================================
+
 // --- Audio ---
 class AudioEngine {
     constructor() { this.ctx = null; this.enabled = true; }
@@ -238,23 +304,26 @@ const RAR = {
     E: { n: 'Epic',      c: '#9b59b6', b: 2.5 },
     L: { n: 'Legendary', c: '#f39c12', b: 6 },
     M: { n: 'Mythic',    c: '#e74c3c', b: 15 },
+    D: { n: 'Divine',    c: '#ff4fd8', b: 60 },
     S: { n: 'Classic',   c: '#7f8c8d', b: 0 }
 };
-const RKEYS = ['C','U','R','E','L','M'];
-const TIER_SCALE = [1, 2.5, 6, 15, 35, 80, 180, 400]; // pet boost = rarity base x egg tier scale
+const RKEYS = ['C','U','R','E','L','M','D'];
+const TIER_TABLE = [1, 2.5, 6, 15, 35, 80, 180, 400];
+// pet boost = rarity base x egg tier scale (tiers past the table grow x3.2 each)
+const tierScale = (i) => i < TIER_TABLE.length ? TIER_TABLE[i] : 400 * Math.pow(3.2, i - 7);
 
-// --- Eggs: odds are [Common, Uncommon, Rare, Epic, Legendary, Mythic] in % ---
+// --- Eggs: odds = [Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine] in % ---
 const eggsData = [
- { name:'Starter Egg', icon:'🥚', cost:100, odds:[60,27,10,2.7,.3,0], pets:{
+ { name:'Starter Egg', icon:'🥚', cost:100, odds:[60,27,10,2.7,.3], pets:{
    C:'🐈 Alley Tabby,🐱 Sleepy Kitten,😺 Whiskers,🐾 Paw Pal', U:'😸 Grinning Tom,🧶 Yarn Chaser,🥛 Milk Mooch',
    R:'🐟 Fish Thief,🌼 Garden Prowler,📦 Box Dweller', E:'🎩 Fancy Cat,🌙 Moon Mouser', L:'👑 Alley King' }},
- { name:'Meadow Egg', icon:'🪺', cost:2500, odds:[50,28,15,5.5,1.5,0], pets:{
+ { name:'Meadow Egg', icon:'🪺', cost:2500, odds:[50,28,15,5.5,1.5], pets:{
    C:'🐮 Barn Cat,🌾 Hay Napper,🐭 Mouse Pal,🍎 Orchard Kitty', U:'🐓 Rooster Rival,🧀 Cheese Hunter,🌻 Sunflower Cat',
    R:'🦋 Butterfly Chaser,🐝 Honey Bandit,🐇 Bunny Buddy', E:'🌈 Rainbow Tabby,🦌 Forest Spirit', L:'🦄 Unicorn Kitty' }},
- { name:'Ocean Egg', icon:'🐚', cost:40000, odds:[42,28,18,9,3,0], pets:{
+ { name:'Ocean Egg', icon:'🐚', cost:40000, odds:[42,28,18,9,3], pets:{
    C:'🦀 Crab Pouncer,🐠 Reef Kitty,🐚 Shell Cat,🏖️ Beach Lounger', U:'🐬 Dolphin Cat,🦭 Seal Whisker,🌊 Wave Rider',
    R:'🐙 Octo-Cat,🦈 Shark Cat,🪸 Coral Guardian', E:'🧜 Mer-Cat,⚓ Pirate Captain', L:'🐋 Leviathan Cat' }},
- { name:'Frost Egg', icon:'🧊', cost:600000, odds:[35,28,22,11,4,0], pets:{
+ { name:'Frost Egg', icon:'🧊', cost:600000, odds:[35,28,22,11,4], pets:{
    C:'⛄ Snowball,🧣 Scarf Kitty,🐧 Penguin Pal,❄️ Flurry Cat', U:'🐻‍❄️ Polar Paws,🎿 Ski Slider,☃️ Frosty',
    R:'🦊 Arctic Fox Cat,🏔️ Peak Prowler,🧊 Ice Cube Cat', E:'🥶 Blizzard Beast,🌨️ Storm Whisker', L:'🐺 Frostfang Alpha' }},
  { name:'Volcano Egg', icon:'🌋', cost:9000000, odds:[30,27,24,13,5,1], pets:{
@@ -268,7 +337,39 @@ const eggsData = [
    R:'🛰️ Satellite Cat,🌌 Nebula Cat,🔭 Stargazer', E:'🕳️ Black Hole Cat,⚡ Quasar Cat', L:'🌍 World Cat', M:'🌀 Galaxy Eater' }},
  { name:'Heaven Egg', icon:'🔱', cost:40000000000, odds:[15,22,27,22,12,2], pets:{
    C:'☁️ Cloud Kitty,🕊️ Dove Cat,🎶 Choir Kitten', U:'😇 Halo Cat,🪽 Wing Cat,🔔 Bell Cat',
-   R:'🏛️ Temple Guardian,📜 Oracle Cat,⚜️ Royal Cat', E:'🧚 Fairy Cat,🔱 Trident Cat', L:'👼 Seraph Cat', M:'💎 The Eternal Cat' }}
+   R:'🏛️ Temple Guardian,📜 Oracle Cat,⚜️ Royal Cat', E:'🧚 Fairy Cat,🔱 Trident Cat', L:'👼 Seraph Cat', M:'💎 The Eternal Cat' }},
+
+ // ---- NEW: high-end eggs (each has a Divine pet) ----
+ { name:'Crystal Egg', icon:'💠', cost:8e11, odds:[20,28,28,15,7,1.8,.2], pets:{
+   C:'💎 Quartz Kitten,🔹 Shard Cat,🪩 Disco Cat', U:'🔷 Sapphire Cat,🟢 Emerald Cat', R:'🔶 Topaz Tiger,❤️‍🔥 Ruby Roar',
+   E:'💠 Prism Panther', L:'🏺 Geode Guardian', M:'👸 Crystal Queen', D:'🌈 Spectrum Sovereign' }},
+ { name:'Shadow Egg', icon:'🦇', cost:2e13, odds:[16,26,29,17,9,2.7,.3], pets:{
+   C:'🌑 Shade Kitten,🦇 Bat Whisker,🕯️ Candle Cat', U:'👻 Ghost Cat,🕸️ Web Weaver', R:'🧛 Vampurr,🎃 Pumpkin Prowler',
+   E:'💀 Reaper Cat', L:'🖤 Night King', M:'🌘 Eclipse Beast', D:'🪦 Umbra Eternal' }},
+ { name:'Thunder Egg', icon:'⚡', cost:5e14, odds:[13,24,29,19,11,3.5,.5], pets:{
+   C:'🌩️ Static Kitten,🔋 Battery Cat,🌀 Gust Cat', U:'⚡ Spark Cat,🌪️ Twister Tom', R:'🐅 Storm Tiger,🔨 Hammer Cat',
+   E:'🦖 Rex Roar', L:'⛈️ Thunder Lord', M:'🪬 Tempest Titan', D:'🌟 Zeus Paws' }},
+ { name:'Dream Egg', icon:'🛏️', cost:1.2e16, odds:[10,21,29,22,13,4.3,.7], pets:{
+   C:'💤 Snooze Cat,🛏️ Pillow Pouncer,🧸 Teddy Tabby', U:'🎠 Carousel Cat,🎈 Balloon Cat', R:'🎪 Circus Cat,🪄 Magic Mittens',
+   E:'🌸 Lucid Lynx', L:'🎭 Mask Master', M:'🪞 Dreamweaver', D:'🧿 Sandman Supreme' }},
+ { name:'Time Egg', icon:'⏳', cost:3e17, odds:[8,18,29,24,15,5.2,.8], pets:{
+   C:'⏳ Sand Kitten,⌛ Hourglass Cat,⏰ Alarm Cat', U:'🕰️ Clock Cat,📅 Calendar Cat', R:'🔁 Loop Cat,⏪ Rewind Cat',
+   E:'🧙 Chrono Mage', L:'🗝️ Time Keeper', M:'🌗 Epoch Lord', D:'🔄 Paradox Prime' }},
+ { name:'Void Egg', icon:'⚫', cost:8e18, odds:[6,16,28,26,17,6,1], pets:{
+   C:'🫥 Faded Kitten,🌫️ Mist Cat,⬛ Pixel Void', U:'🫧 Rift Cat,🕷️ Void Spider', R:'👁️ Watcher Cat,🦑 Abyss Squid',
+   E:'☠️ Null Cat', L:'⚫ Void Emperor', M:'🌚 Oblivion Cat', D:'🔲 The Nothing' }},
+ { name:'Astral Egg', icon:'✨', cost:2e20, odds:[5,13,27,28,19,7,1], pets:{
+   C:'✨ Stardust Kitten,🔆 Glow Cat,🪔 Lantern Cat', U:'🌟 Nova Cat,💫 Orbit Cat', R:'🎇 Firework Feline,🎆 Comet Cat',
+   E:'🦚 Aurora Peacock Cat', L:'🌞 Sun Emperor', M:'🧭 Astral Navigator', D:'🏵️ Celestial Sovereign' }},
+ { name:'Primal Egg', icon:'🦕', cost:5e21, odds:[4,10,25,30,21,8.5,1.5], pets:{
+   C:'🦴 Bone Kitten,🪵 Stick Cat,🍖 Meat Cat', U:'🦣 Mammoth Cat,🦕 Longneck Cat', R:'🐆 Saber Tiger,🌿 Fern Prowler',
+   E:'🐊 Swamp Beast', L:'🦍 Alpha Primal', M:'🌳 World Tree Cat', D:'🗿 Titan of Origin' }},
+ { name:'Infinity Egg', icon:'♾️', cost:1.5e23, odds:[3,8,22,31,24,10,2], pets:{
+   C:'➕ Plus Kitten,➖ Minus Cat,✖️ Times Cat', U:'🔢 Number Cat,🧮 Abacus Cat', R:'📐 Geometry Cat,🔣 Symbol Cat',
+   E:'♾️ Loop Infinity', L:'🧩 Puzzle King', M:'📚 Knowledge Eater', D:'🌐 Infinity Itself' }},
+ { name:'Omni Egg', icon:'🌅', cost:5e24, odds:[2,6,20,31,27,12,2], pets:{
+   C:'🥇 Gold Kitten,🥈 Silver Cat,🥉 Bronze Cat', U:'🏅 Medal Cat,🎖️ Veteran Cat', R:'🎗️ Ribbon Cat,🏆 Trophy Cat',
+   E:'🦁 Lion Lord', L:'🐈‍⬛ Shadow Omni', M:'🌅 Dawn of Cats', D:'🙏 The Omnicat' }}
 ];
 
 // --- Build the pet database from the egg data ---
@@ -278,12 +379,12 @@ eggsData.forEach((egg, ei) => {
     RKEYS.forEach(r => {
         (egg.pets[r] || '').split(',').filter(Boolean).forEach((s, i) => {
             const sp = s.indexOf(' '), id = `e${ei}${r}${i}`;
-            PETS[id] = { id, icon: s.slice(0, sp), name: s.slice(sp + 1), rar: r, mult: RAR[r].b * TIER_SCALE[ei], egg: ei };
+            PETS[id] = { id, icon: s.slice(0, sp), name: s.slice(sp + 1), rar: r, mult: RAR[r].b * tierScale(ei), egg: ei };
             egg.list.push(id);
         });
     });
 });
-// Your original cats (kept so old saves still work; not in any egg)
+// Original cats (kept so old saves still work; not in any egg)
 [['cat_default','🐱','House Cat',.25],['cat_calico','😸','Calico Cutie',.5],['cat_siamese','😺','Siamese Scholar',1],
  ['cat_ninja','🥷','Ninja Cat',2.5],['cat_cyber','🤖','Cyber Cat',6],['cat_cosmic','🌌','Cosmic Feline',15]]
  .forEach(([id, icon, name, mult]) => PETS[id] = { id, icon, name, rar: 'S', mult, egg: -1 });
@@ -293,18 +394,31 @@ const MAX_EQUIPPED = 4;
 let state = {
     pats: 0, totalPats: 0, manualClicks: 0, goldenCatsCaught: 0, timePlayed: 0,
     prestigeCount: 0, goldenPaws: 0, eggsOpened: 0,
-    pets: { cat_default: 1 },      // petId -> how many you own
-    equipped: ['cat_default'],     // petIds in the 4 slots
-    upgrades: {}, achievements: {}, theme: 'light'
+    pets: { cat_default: 1 }, equipped: ['cat_default'],
+    upgrades: {}, achievements: {}, theme: 'light',
+    username: '', nameSkipped: false
 };
 
+// --- Shop content ---
 const clickUpgrades = [
     { id:'c1', name:'Soft Glove', cost:15, power:1, icon:'🧤' },
     { id:'c2', name:'Catnip Finger', cost:100, power:5, icon:'🌿' },
     { id:'c3', name:'Brush of Destiny', cost:1100, power:25, icon:'🧹' },
     { id:'c4', name:'Laser Pointer', cost:12000, power:120, icon:'🔦' },
     { id:'c5', name:'Feather Wand Extraordinaire', cost:130000, power:800, icon:'🪶' },
-    { id:'c6', name:'Golden Scratching Post', cost:1500000, power:6000, icon:'🏆' }
+    { id:'c6', name:'Golden Scratching Post', cost:1500000, power:6000, icon:'🏆' },
+    { id:'c7', name:'Cosmic Claw', cost:2e7, power:45000, icon:'🪐' },
+    { id:'c8', name:'Nebula Mitts', cost:3e8, power:3e5, icon:'🌌' },
+    { id:'c9', name:'Black Hole Brush', cost:5e9, power:2e6, icon:'🕳️' },
+    { id:'c10', name:'Time-Warp Treats', cost:8e10, power:1.5e7, icon:'⏳' },
+    { id:'c11', name:'Reality Rake', cost:1.5e12, power:1.2e8, icon:'🔱' },
+    { id:'c12', name:'Multiverse Mittens', cost:3e13, power:1e9, icon:'🧿' },
+    { id:'c13', name:'Divine Paw', cost:6e14, power:8e9, icon:'🙏' },
+    { id:'c14', name:'Infinity Glove', cost:1.5e16, power:7e10, icon:'♾️' },
+    { id:'c15', name:'Omni-Pat Gauntlet', cost:5e17, power:6e11, icon:'🌅' },
+    { id:'c16', name:'Hand of the Cat God', cost:2e19, power:6e12, icon:'👁️' },
+    { id:'c17', name:'Paw of Creation', cost:1e21, power:7e13, icon:'💫' },
+    { id:'c18', name:'The Final Scratch', cost:6e22, power:9e14, icon:'🌠' }
 ];
 const passiveUpgrades = [
     { id:'p1', name:'Stray Friend', cost:15, pps:.5, icon:'🐈' },
@@ -313,7 +427,38 @@ const passiveUpgrades = [
     { id:'p4', name:'Catnip Garden', cost:12000, pps:260, icon:'🌱' },
     { id:'p5', name:'Cat Café', cost:130000, pps:1800, icon:'☕' },
     { id:'p6', name:'Feline Fortress', cost:1400000, pps:12500, icon:'🏰' },
-    { id:'p7', name:'Quantum Cat Lab', cost:20000000, pps:95000, icon:'🔬' }
+    { id:'p7', name:'Quantum Cat Lab', cost:20000000, pps:95000, icon:'🔬' },
+    { id:'p8', name:'Cat Moon Base', cost:3.3e8, pps:7e5, icon:'🌙' },
+    { id:'p9', name:'Galactic Litter Empire', cost:5.1e9, pps:5e6, icon:'🚀' },
+    { id:'p10', name:'Dimension Dairy', cost:7.5e10, pps:4e7, icon:'🥛' },
+    { id:'p11', name:'Time Cat Temple', cost:1.1e12, pps:3e8, icon:'⛩️' },
+    { id:'p12', name:'Cosmic Cat Factory', cost:1.7e13, pps:2.4e9, icon:'🏭' },
+    { id:'p13', name:'Universe Café Chain', cost:2.6e14, pps:2e10, icon:'🌐' },
+    { id:'p14', name:'Parallel Cat Realm', cost:4e15, pps:1.6e11, icon:'🪞' },
+    { id:'p15', name:'Akashic Cat Library', cost:7e16, pps:1.4e12, icon:'📚' },
+    { id:'p16', name:'Throne of the Cat God', cost:1.2e18, pps:1.2e13, icon:'👑' },
+    { id:'p17', name:'Nebula Nursery', cost:2.5e19, pps:1.3e14, icon:'🍼' },
+    { id:'p18', name:'Stellar Cat Forge', cost:6e20, pps:1.5e15, icon:'⭐' },
+    { id:'p19', name:'Cat Dyson Sphere', cost:1.5e22, pps:1.8e16, icon:'☀️' },
+    { id:'p20', name:'Multiversal Cat Council', cost:5e23, pps:2.5e17, icon:'🏛️' },
+    { id:'p21', name:'Pat Singularity', cost:2e25, pps:4e18, icon:'🌀' }
+];
+// One-time global multipliers (type: 'click' | 'pps' | 'all')
+const boosts = [
+    { id:'b1', name:'Tasty Tuna', cost:1e4, type:'click', mult:2, icon:'🐟' },
+    { id:'b2', name:'Cozy Bed', cost:5e4, type:'pps', mult:2, icon:'🛏️' },
+    { id:'b3', name:'Silk Cushion', cost:2e6, type:'all', mult:1.5, icon:'🧵' },
+    { id:'b4', name:'Sparkle Yarn', cost:8e7, type:'click', mult:3, icon:'🧶' },
+    { id:'b5', name:'Heated Floors', cost:4e8, type:'pps', mult:3, icon:'♨️' },
+    { id:'b6', name:'Purr Amplifier', cost:1e10, type:'all', mult:2, icon:'📢' },
+    { id:'b7', name:'Cat Tower Deluxe', cost:5e11, type:'click', mult:5, icon:'🗼' },
+    { id:'b8', name:'Moonlit Catnap', cost:3e12, type:'pps', mult:5, icon:'😴' },
+    { id:'b9', name:'Golden Whiskers', cost:2e14, type:'all', mult:3, icon:'✨' },
+    { id:'b10', name:'Star Fish Feast', cost:1e16, type:'all', mult:5, icon:'🍣' },
+    { id:'b11', name:'Nine Lives Aura', cost:8e17, type:'all', mult:10, icon:'💫' },
+    { id:'b12', name:'Cat Singularity', cost:5e19, type:'all', mult:25, icon:'🌀' },
+    { id:'b13', name:'Divine Purr', cost:3e21, type:'all', mult:50, icon:'🙏' },
+    { id:'b14', name:'Heat Death of Boredom', cost:2e23, type:'all', mult:150, icon:'🔥' }
 ];
 const achievements = [
     { id:'a1', name:'First Scratch', desc:'Click the cat 1 time.', icon:'🐾', req:() => state.manualClicks >= 1 },
@@ -322,38 +467,50 @@ const achievements = [
     { id:'a4', name:'Golden Hunter', desc:'Catch a Golden Cat.', icon:'🌟', req:() => state.goldenCatsCaught >= 1 },
     { id:'a5', name:'Reincarnated', desc:'Reincarnate for Golden Paws.', icon:'🐾', req:() => state.prestigeCount >= 1 },
     { id:'a6', name:'Egg Cracker', desc:'Hatch 10 eggs.', icon:'🥚', req:() => state.eggsOpened >= 10 },
-    { id:'a7', name:'Lucky Paws', desc:'Hatch a Legendary or Mythic cat.', icon:'🍀', req:() => Object.keys(state.pets).some(id => 'LM'.includes(PETS[id].rar)) },
+    { id:'a7', name:'Lucky Paws', desc:'Hatch a Legendary, Mythic or Divine cat.', icon:'🍀', req:() => Object.keys(state.pets).some(id => 'LMD'.includes(PETS[id].rar)) },
     { id:'a8', name:'Cat Hoarder', desc:'Discover 25 different cats.', icon:'🏠', req:() => Object.keys(state.pets).length >= 25 },
-    { id:'a9', name:'Gotta Catch Em All', desc:'Discover 100 different cats.', icon:'📖', req:() => Object.keys(state.pets).length >= 100 }
+    { id:'a9', name:'Gotta Catch Em All', desc:'Discover 100 different cats.', icon:'📖', req:() => Object.keys(state.pets).length >= 100 },
+    { id:'a10', name:'Divine Touch', desc:'Hatch a Divine cat.', icon:'🌸', req:() => Object.keys(state.pets).some(id => PETS[id].rar === 'D') },
+    { id:'a11', name:'Trillionaire', desc:'Reach 1 trillion total pats.', icon:'💰', req:() => state.totalPats >= 1e12 },
+    { id:'a12', name:'Quadrillionaire', desc:'Reach 1 quadrillion total pats.', icon:'💎', req:() => state.totalPats >= 1e15 },
+    { id:'a13', name:'Cat Encyclopedia', desc:'Discover 200 different cats.', icon:'📚', req:() => Object.keys(state.pets).length >= 200 }
 ];
 
 // --- Multipliers ---
 function getPrestigeMultiplier() { return 1 + state.goldenPaws * 0.1; }
 function getPetMultiplier() { return 1 + state.equipped.reduce((s, id) => s + (PETS[id] ? PETS[id].mult : 0), 0); }
+function getBoostMultiplier(type) {
+    let m = 1;
+    boosts.forEach(b => { if (state.upgrades[b.id] && (b.type === type || b.type === 'all')) m *= b.mult; });
+    return m;
+}
 function calculateClickPower() {
     let p = 1; clickUpgrades.forEach(u => p += (state.upgrades[u.id] || 0) * u.power);
-    return p * getPrestigeMultiplier() * getPetMultiplier();
+    return p * getPrestigeMultiplier() * getPetMultiplier() * getBoostMultiplier('click');
 }
 function calculatePPS() {
     let p = 0; passiveUpgrades.forEach(u => p += (state.upgrades[u.id] || 0) * u.pps);
-    return p * getPrestigeMultiplier() * getPetMultiplier();
+    return p * getPrestigeMultiplier() * getPetMultiplier() * getBoostMultiplier('pps');
 }
 function calculatePendingGoldenPaws() {
     if (state.totalPats < 1e6) return 0;
     return Math.max(0, Math.floor(Math.sqrt(state.totalPats / 1e6)) - state.goldenPaws);
 }
 
-// --- Formatting ---
-const SUF = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi'];
+// --- Formatting (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc, ...) ---
+const SUF = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 'Ud', 'Dd', 'Td'];
 function formatNumber(n, dec = 0) {
+    n = Number(n) || 0;
     if (n < 1000) return dec ? n.toFixed(dec) : Math.floor(n).toLocaleString();
     const i = Math.min(Math.floor(Math.log10(n) / 3), SUF.length - 1);
     return (n / Math.pow(1000, i)).toFixed(2) + SUF[i];
 }
-function fmtMult(m) { return m >= 100 ? formatNumber(m) : String(+m.toFixed(2)); }
+function fmtMult(m) { return m >= 100 ? formatNumber(m) : String(+Number(m).toFixed(2)); }
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (id) => document.getElementById(id);
 
 // --- Clicking ---
-const catBtn = document.getElementById('cat-btn');
+const catBtn = $('cat-btn');
 catBtn.addEventListener('click', (e) => {
     const power = calculateClickPower();
     state.pats += power; state.totalPats += power; state.manualClicks++;
@@ -369,7 +526,7 @@ function createParticle(x, y, text) {
     setTimeout(() => el.remove(), 800);
 }
 
-// --- Upgrades ---
+// --- Upgrades & Boosts ---
 const upgCost = (u) => Math.floor(u.cost * Math.pow(1.15, state.upgrades[u.id] || 0));
 function buyUpgrade(id, type) {
     const item = (type === 'click' ? clickUpgrades : passiveUpgrades).find(u => u.id === id);
@@ -380,6 +537,14 @@ function buyUpgrade(id, type) {
         audioEngine.playSound('buy');
         renderShops(); updateDisplay();
     }
+}
+function buyBoost(id) {
+    const b = boosts.find(x => x.id === id);
+    if (!b || state.upgrades[id] || state.pats < b.cost) return;
+    state.pats -= b.cost; state.upgrades[id] = 1;
+    audioEngine.playSound('buy');
+    showToast(`${b.name} bought! x${b.mult} ${b.type === 'all' ? 'everything' : b.type === 'click' ? 'click power' : 'passive income'}`, b.icon);
+    renderBoosts(); updateDisplay();
 }
 function renderShops() {
     const build = (list, type, effect) => list.map(u => `
@@ -392,13 +557,26 @@ function renderShops() {
             </div>
             <div class="upgrade-count">${state.upgrades[u.id] || 0}</div>
         </div>`).join('');
-    document.getElementById('click-upgrades-list').innerHTML = build(clickUpgrades, 'click', u => `+${u.power} per click`);
-    document.getElementById('passive-upgrades-list').innerHTML = build(passiveUpgrades, 'passive', u => `+${u.pps} pat/sec`);
+    $('click-upgrades-list').innerHTML = build(clickUpgrades, 'click', u => `+${formatNumber(u.power)} per click`);
+    $('passive-upgrades-list').innerHTML = build(passiveUpgrades, 'passive', u => `+${formatNumber(u.pps, u.pps < 10 ? 1 : 0)} pat/sec`);
+}
+function renderBoosts() {
+    $('boost-list').innerHTML = boosts.map(b => {
+        const owned = !!state.upgrades[b.id];
+        const what = b.type === 'all' ? 'all production' : b.type === 'click' ? 'click power' : 'passive income';
+        return `<div class="upgrade-card ${owned ? 'owned' : ''}" ${owned ? '' : `data-cost="${b.cost}" onclick="buyBoost('${b.id}')"`}>
+            <div class="upgrade-icon">${b.icon}</div>
+            <div class="upgrade-details">
+                <div class="upgrade-name">${b.name}</div>
+                <div class="upgrade-effect">x${b.mult} ${what}</div>
+                <div class="upgrade-cost">${owned ? '✅ Owned' : formatNumber(b.cost) + ' pats'}</div>
+            </div></div>`;
+    }).join('');
 }
 
 // --- Eggs & Hatching ---
 function renderEggs() {
-    document.getElementById('egg-list').innerHTML = eggsData.map((e, i) => {
+    $('egg-list').innerHTML = eggsData.map((e, i) => {
         const odds = e.odds.map((o, k) => o > 0 ? `<span style="color:${RAR[RKEYS[k]].c}">${RAR[RKEYS[k]].n} ${o}%</span>` : '').join('');
         const pets = e.list.map(id => { const p = PETS[id];
             return `<div><span style="color:${RAR[p.rar].c}">●</span> ${p.icon} ${p.name} <span style="color:var(--gold)">+${fmtMult(p.mult)}</span></div>`; }).join('');
@@ -417,9 +595,9 @@ function renderEggs() {
 function rollPet(ei) {
     const egg = eggsData[ei];
     let r = Math.random() * 100, k = 'C';
-    for (let i = 0; i < 6; i++) { r -= egg.odds[i]; if (r < 0) { k = RKEYS[i]; break; } }
+    for (let i = 0; i < RKEYS.length; i++) { r -= (egg.odds[i] || 0); if (r < 0) { k = RKEYS[i]; break; } }
     const pool = egg.list.filter(id => PETS[id].rar === k);
-    return pool[Math.floor(Math.random() * pool.length)];
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : egg.list[0];
 }
 function hatch(ei, n) {
     const cost = eggsData[ei].cost * n;
@@ -430,15 +608,14 @@ function hatch(ei, n) {
         const id = rollPet(ei);
         results.push({ id, isNew: !state.pets[id] });
         state.pets[id] = (state.pets[id] || 0) + 1;
-        if ('LM'.includes(PETS[id].rar)) showToast(`${RAR[PETS[id].rar].n}! You hatched ${PETS[id].name}!`, PETS[id].icon);
+        if ('LMD'.includes(PETS[id].rar)) showToast(`${RAR[PETS[id].rar].n}! You hatched ${PETS[id].name}!`, PETS[id].icon);
     }
     state.eggsOpened += n;
-    const best = results.some(r => 'LM'.includes(PETS[r.id].rar));
+    const best = results.some(r => 'LMD'.includes(PETS[r.id].rar));
     audioEngine.playSound(best ? 'golden' : 'buy');
     results.sort((a, b) => PETS[b.id].mult - PETS[a.id].mult);
-    document.getElementById('hatch-panel').style.display = 'flex';
-    document.getElementById('hatch-results').innerHTML = results.map((r, i) =>
-        petCard(PETS[r.id], { cls: 'pop', delay: i * 0.05, isNew: r.isNew })).join('');
+    $('hatch-panel').style.display = 'flex';
+    $('hatch-results').innerHTML = results.map((r, i) => petCard(PETS[r.id], { cls: 'pop', delay: i * 0.05, isNew: r.isNew })).join('');
     refreshPets(); checkAchievements();
 }
 
@@ -461,15 +638,15 @@ function renderEquipped() {
                 <div style="color:var(--gold)">+${fmtMult(p.mult)}</div></div>`
             : `<div class="slot">＋<br>Empty slot</div>`;
     }
-    document.getElementById('equipped-slots').innerHTML = html;
-    document.getElementById('slot-count').innerText = state.equipped.length;
-    document.getElementById('equipped-bar').innerText = state.equipped.map(id => PETS[id].icon).join(' ');
+    $('equipped-slots').innerHTML = html;
+    $('slot-count').innerText = state.equipped.length;
+    $('equipped-bar').innerText = state.equipped.map(id => PETS[id].icon).join(' ');
     catBtn.innerText = state.equipped.length ? PETS[state.equipped[0]].icon : '🐱';
 }
 function renderInventory() {
     const ids = Object.keys(state.pets).sort((a, b) => PETS[b].mult - PETS[a].mult);
-    document.getElementById('inv-count').innerText = `${ids.length}/${Object.keys(PETS).length}`;
-    document.getElementById('inv-list').innerHTML = ids.map(id => {
+    $('inv-count').innerText = `${ids.length}/${Object.keys(PETS).length}`;
+    $('inv-list').innerHTML = ids.map(id => {
         const eq = equippedCount(id);
         return petCard(PETS[id], { cls: 'clickable', qty: state.pets[id], onclick: `equipPet('${id}')`,
             extra: eq ? `<div style="font-size:11px;font-weight:800;color:var(--accent-main)">${eq} equipped</div>` : '' });
@@ -493,7 +670,7 @@ function equipBest() {
 
 // --- Achievements ---
 function renderAchievements() {
-    document.getElementById('achievements-list').innerHTML = achievements.map(a =>
+    $('achievements-list').innerHTML = achievements.map(a =>
         `<div class="achievement-badge ${state.achievements[a.id] ? 'unlocked' : ''}" title="${a.name}: ${a.desc}">${a.icon}</div>`).join('');
 }
 function checkAchievements() {
@@ -507,12 +684,11 @@ function checkAchievements() {
 }
 
 // --- Display (numbers only, no rebuilding, so buttons never flicker) ---
-const $ = (id) => document.getElementById(id);
 function updateDisplay() {
     $('pat-count').innerText = formatNumber(Math.floor(state.pats));
     $('pps-count').innerText = formatNumber(calculatePPS(), 1);
     $('click-power-display').innerText = `Power: ${formatNumber(calculateClickPower())}`;
-    $('prestige-mult').innerText = `${getPrestigeMultiplier().toFixed(1)}x`;
+    $('prestige-mult').innerText = `${formatNumber(getPrestigeMultiplier(), 1)}x`;
     $('pet-mult').innerText = $('pet-mult2').innerText = `${fmtMult(getPetMultiplier())}x`;
     $('stat-total-pats').innerText = formatNumber(Math.floor(state.totalPats));
     $('stat-clicks').innerText = formatNumber(state.manualClicks);
@@ -520,8 +696,8 @@ function updateDisplay() {
     $('stat-eggs').innerText = formatNumber(state.eggsOpened);
     $('stat-time').innerText = `${Math.floor(state.timePlayed)}s`;
     $('stat-prestige').innerText = state.prestigeCount;
-    $('current-paws').innerText = state.goldenPaws;
-    $('pending-paws').innerText = calculatePendingGoldenPaws();
+    $('current-paws').innerText = formatNumber(state.goldenPaws);
+    $('pending-paws').innerText = formatNumber(calculatePendingGoldenPaws());
     document.querySelectorAll('[data-cost]').forEach(el => el.classList.toggle('disabled', state.pats < +el.dataset.cost));
 }
 
@@ -550,18 +726,111 @@ setInterval(() => {
     updateDisplay(); checkAchievements();
 }, 100);
 setInterval(() => saveGame(false), 30000);
+setInterval(() => submitScore(), 60000);
 
 // --- Reincarnation (pets are kept) ---
 function doPrestige() {
     const pending = calculatePendingGoldenPaws();
     if (pending <= 0) { alert("You need at least 1,000,000 Total Pats to earn your next Golden Paw!"); return; }
-    if (confirm(`Reincarnate now for +${pending} Golden Paws?\n\nThis resets your Pats and Buildings. Golden Paws and all your pets stay!`)) {
+    if (confirm(`Reincarnate now for +${formatNumber(pending)} Golden Paws?\n\nThis resets your Pats, Buildings and Boosts. Golden Paws and all your pets stay!`)) {
         state.goldenPaws += pending; state.prestigeCount++;
         state.pats = 0; state.upgrades = {};
-        saveGame(true); renderShops(); updateDisplay();
+        saveGame(true); renderShops(); renderBoosts(); updateDisplay(); submitScore();
         showToast("Reincarnated successfully!", "🐾");
     }
 }
+
+// ================= LEADERBOARD =================
+const fbReady = () => !!(FB.apiKey && FB.databaseURL);
+let fbAuthData = null, lbField = 'totalPats';
+
+// Anonymous Firebase sign-in (REST). Gives each player a private ID so nobody can overwrite your score.
+async function fbAuth() {
+    if (fbAuthData && Date.now() < fbAuthData.exp) return fbAuthData;
+    let saved = null; try { saved = JSON.parse(localStorage.getItem('catClickerFbAuth')); } catch (e) {}
+    if (saved && saved.refreshToken) {
+        const r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FB.apiKey}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(saved.refreshToken)}` });
+        if (r.ok) {
+            const d = await r.json();
+            fbAuthData = { idToken: d.id_token, uid: d.user_id, exp: Date.now() + 3300000 };
+            localStorage.setItem('catClickerFbAuth', JSON.stringify({ refreshToken: d.refresh_token }));
+            return fbAuthData;
+        }
+    }
+    const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB.apiKey}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ returnSecureToken: true }) });
+    if (!r.ok) throw new Error('auth failed');
+    const d = await r.json();
+    fbAuthData = { idToken: d.idToken, uid: d.localId, exp: Date.now() + 3300000 };
+    localStorage.setItem('catClickerFbAuth', JSON.stringify({ refreshToken: d.refreshToken }));
+    return fbAuthData;
+}
+async function submitScore() {
+    if (!fbReady() || !state.username) return;
+    try {
+        const a = await fbAuth();
+        await fetch(`${FB.databaseURL}/leaderboard/${a.uid}.json?auth=${a.idToken}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                name: state.username, nameLower: state.username.toLowerCase(),
+                totalPats: Math.floor(state.totalPats), goldenPaws: state.goldenPaws,
+                petMult: +getPetMultiplier().toFixed(2), eggs: state.eggsOpened, updated: Date.now()
+            })
+        });
+    } catch (e) {}
+}
+function setLbField(f) {
+    lbField = f;
+    document.querySelectorAll('[data-lb]').forEach(b => b.classList.toggle('active', b.dataset.lb === f));
+    loadLeaderboard();
+}
+async function loadLeaderboard() {
+    const box = $('lb-list');
+    if (!fbReady()) {
+        box.innerHTML = `<div class="lb-note">🔧 The global leaderboard isn't connected yet. The game owner needs to add their Firebase keys at the top of the script. Your stats: <b>${formatNumber(state.totalPats)}</b> total pats, <b>${formatNumber(state.goldenPaws)}</b> Golden Paws.</div>`;
+        return;
+    }
+    box.innerHTML = '<div class="lb-note">Loading…</div>';
+    try {
+        const q = `orderBy=${encodeURIComponent('"' + lbField + '"')}&limitToLast=50`;
+        const r = await fetch(`${FB.databaseURL}/leaderboard.json?${q}`);
+        const d = await r.json();
+        if (d && d.error) throw new Error(d.error);
+        const me = fbAuthData ? fbAuthData.uid : null;
+        const rows = Object.entries(d || {}).map(([uid, v]) => ({ uid, ...v })).sort((a, b) => (b[lbField] || 0) - (a[lbField] || 0));
+        if (!rows.length) { box.innerHTML = '<div class="lb-note">No scores yet. Be the first!</div>'; return; }
+        const medals = ['🥇', '🥈', '🥉'];
+        box.innerHTML = `<div class="lb-row lb-head"><span>Rank</span><span>Player</span><span>Total Pats</span><span>Golden Paws</span><span>Pet Boost</span></div>` +
+            rows.map((e, i) => `<div class="lb-row ${e.uid === me ? 'me' : ''}"><span>${medals[i] || i + 1}</span><span>${esc(e.name)}</span>
+                <span>${formatNumber(e.totalPats)}</span><span>${formatNumber(e.goldenPaws)}</span><span>${fmtMult(Number(e.petMult) || 0)}x</span></div>`).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="lb-note">Could not load the leaderboard. Check your Firebase rules and keys, then press Refresh.</div>';
+    }
+}
+
+// --- Username ---
+function renderUsername() { $('lb-name').innerText = state.username || 'Not set'; }
+function openNameModal() { $('name-input').value = state.username || ''; $('name-error').innerText = ''; $('name-modal').style.display = 'flex'; $('name-input').focus(); }
+function closeNameModal() { $('name-modal').style.display = 'none'; }
+async function saveName() {
+    const n = $('name-input').value.trim(), err = (m) => $('name-error').innerText = m;
+    if (!/^[A-Za-z0-9_-]{3,16}$/.test(n)) { err('Use 3–16 characters: letters, numbers, _ or -'); return; }
+    if (fbReady()) {
+        try {
+            const a = await fbAuth();
+            const q = `orderBy=${encodeURIComponent('"nameLower"')}&equalTo=${encodeURIComponent('"' + n.toLowerCase() + '"')}`;
+            const d = await (await fetch(`${FB.databaseURL}/leaderboard.json?${q}`)).json();
+            if (d && d.error) { err('Leaderboard setup is incomplete (missing index rules).'); return; }
+            if (d && Object.keys(d).some(k => k !== a.uid)) { err('That name is already taken.'); return; }
+        } catch (e) { err("Couldn't reach the leaderboard. Try again."); return; }
+    }
+    state.username = n; state.nameSkipped = false;
+    saveGame(false); closeNameModal(); renderUsername(); submitScore();
+    showToast(`Welcome, ${n}!`, '🐱');
+}
+function skipName() { state.nameSkipped = true; saveGame(false); closeNameModal(); }
 
 // --- UI ---
 function toggleMute() {
@@ -576,19 +845,22 @@ function toggleTheme() {
     state.theme = state.theme === 'light' ? 'dark' : 'light';
     applyTheme(); saveGame(false);
 }
+const TABS = ['game', 'cats', 'boosts', 'leaderboard', 'stats', 'prestige', 'settings'];
 function switchTab(tabId, evt) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    ['game', 'cats', 'stats', 'prestige', 'settings'].forEach(t => $(`${t}-tab`).style.display = 'none');
+    TABS.forEach(t => $(`${t}-tab`).style.display = 'none');
     $(`${tabId}-tab`).style.display = 'grid';
     if (evt && evt.target) evt.target.classList.add('active');
     if (tabId === 'cats') { renderEquipped(); renderInventory(); }
+    if (tabId === 'boosts') renderBoosts();
     if (tabId === 'stats') renderAchievements();
+    if (tabId === 'leaderboard') { renderUsername(); submitScore().then(loadLeaderboard); }
     updateDisplay();
 }
 function showToast(text, icon = '🏆') {
     const t = document.createElement('div');
     t.className = 'toast';
-    t.innerHTML = `<span style="font-size:24px">${icon}</span> <span>${text}</span>`;
+    t.innerHTML = `<span style="font-size:24px">${icon}</span> <span>${esc(text)}</span>`;
     $('toast-container').appendChild(t);
     setTimeout(() => t.remove(), 4000);
 }
@@ -602,8 +874,7 @@ function loadGame() {
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem('catClickerDeluxeSave')); } catch (e) {}
     if (saved) {
-        // Upgrade old saves (owned cats -> pet inventory)
-        if (!saved.pets && saved.ownedCats) {
+        if (!saved.pets && saved.ownedCats) {   // upgrade very old saves
             saved.pets = {}; saved.ownedCats.forEach(id => saved.pets[id] = 1);
             saved.equipped = saved.equippedCat ? [saved.equippedCat] : [];
         }
@@ -612,12 +883,14 @@ function loadGame() {
     } else if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) {
         state.theme = 'dark';
     }
-    // Clean up anything invalid
     Object.keys(state.pets).forEach(id => { if (!PETS[id]) delete state.pets[id]; });
     if (!Object.keys(state.pets).length) state.pets = { cat_default: 1 };
     const left = { ...state.pets };
     state.equipped = (state.equipped || []).filter(id => left[id] > 0 && left[id]--).slice(0, MAX_EQUIPPED);
-    applyTheme(); renderEggs(); renderShops(); renderEquipped(); renderInventory(); renderAchievements(); updateDisplay();
+    applyTheme(); renderEggs(); renderShops(); renderBoosts(); renderEquipped(); renderInventory();
+    renderAchievements(); renderUsername(); updateDisplay();
+    if (!state.username && !state.nameSkipped) openNameModal();
+    else submitScore();
 }
 function hardReset() {
     if (confirm("Are you sure? This will permanently delete ALL progress!")) {
