@@ -982,5 +982,117 @@ function hardReset() {
 
 window.addEventListener('DOMContentLoaded', loadGame);
 </script>
+    <script>
+// ======== EXPANSION PACK: more upgrades, boosts, eggs, badges + anti jitter-click ========
+(() => {
+  const split = (s) => { const i = s.indexOf(' '); return [s.slice(0, i), s.slice(i + 1)]; };
+
+  // ---- 1) Bigger number names (up to 1e93; beyond that it shows like 1.23e96) ----
+  SUF.push('Qad','Qid','Sxd','Spd','Ocd','Nod','Vg','Uvg','Dvg','Tvg','Qavg','Qivg','Sxvg','Spvg','Ocvg','Novg','Tg');
+
+  // ---- 2) More click upgrades (+29). Each tier costs x8.5 and gives x6.2 more power ----
+  ['🌈 Rainbow Rake','🪄 Wizard Whiskers','🧬 Gene-Splice Gloves','🛸 Alien Scratcher','🌋 Magma Mitts','🌊 Tidal Tickler',
+   '⚡ Thunder Fingers','🧊 Absolute Zero Pat','🌪️ Cyclone Claw','🪙 Midas Paw','🎆 Supernova Stroke','🧠 Mind-Meld Mittens',
+   '🔮 Oracle Gauntlet','🦾 Titan Arm','🪽 Angel Wing Brush','🕰️ Chrono Claw','🌳 World-Tree Branch','🗡️ Blade of Purrs',
+   '👑 Crown of Claws','🌀 Vortex Glove','🪐 Saturn Scratcher','🌌 Galaxy Grabber','🔥 Phoenix Paw','🗿 Titan Tickler',
+   '🧿 Third-Eye Touch','📿 Prayer Pats','🏛️ Pantheon Palms','♾️ Endless Stroke','🌠 Big Bang Boop'
+  ].forEach(s => {
+    const [icon, name] = split(s), last = clickUpgrades[clickUpgrades.length - 1];
+    clickUpgrades.push({ id: 'c' + (clickUpgrades.length + 1), name, icon, cost: last.cost * 8.5, power: last.power * 6.2 });
+  });
+
+  // ---- 3) More buildings (+30). Each tier costs x8 and makes x6.2 more pats/sec ----
+  ['🏝️ Cat Island','🚂 Purr Express','🎪 Cat Circus','🏟️ Meow Stadium','🌆 Kitty Metropolis','🛳️ Cruise Ship of Cats',
+   '🛰️ Orbital Cat Ring','🧪 Catnip Refinery','🏯 Shogun Cat Castle','🌴 Jungle Cat Sanctuary','🎡 Ferris Wheel of Fur','🚀 Warp Cat Fleet',
+   '🪐 Terraformed Cat World','🌞 Sun-Siphon Array','🕳️ Black Hole Litterbox','🧫 Cat Cloning Vats','📡 Meow Broadcast Network',
+   '🏺 Pharaoh’s Vault','🗼 Tower of Purrs','🌌 Galactic Cat Senate','⚙️ Clockwork Cosmos','🌿 Eden of Cats','🔔 Bell of Beginnings',
+   '🧵 Fate-Weaving Loom','🎼 Symphony of Purrs','🪞 Mirror Multiverse','📖 Book of All Cats','🌅 Dawn Engine','🔱 Throne of Existence','🐾 The First Paw'
+  ].forEach(s => {
+    const [icon, name] = split(s), last = passiveUpgrades[passiveUpgrades.length - 1];
+    passiveUpgrades.push({ id: 'p' + (passiveUpgrades.length + 1), name, icon, cost: last.cost * 8, pps: last.pps * 6.2 });
+  });
+
+  // ---- 4) More boosts (+22). Each costs x12 the one before ----
+  const types = ['all', 'click', 'pps', 'all', 'all'];
+  ['🥫 Gourmet Gravy','🧴 Premium Catnip Oil','🎧 Purr Playlist','🪟 Sunbeam Window','🛋️ Velvet Sofa Throne','🍤 Shrimp Buffet',
+   '🕯️ Ritual Candles','🧣 Cashmere Cape','🪁 Cosmic Kite','🎻 Violin of Vigor','🔭 Observatory Nap Deck','🧁 Frosted Treats',
+   '🏔️ Mountain Retreat','🌺 Blooming Bliss','🪬 Lucky Charm of Nine','🌊 Ocean of Milk','📜 Ancient Purr Scroll','🧊 Frozen Time Treat',
+   '🌙 Eternal Moonlight','🪅 Festival of Fur','🎇 Aurora Aura','🦋 Butterfly Effect'
+  ].forEach((s, i) => {
+    const [icon, name] = split(s), last = boosts[boosts.length - 1];
+    boosts.push({ id: 'b' + (boosts.length + 1), name, icon, cost: last.cost * 12, type: types[i % 5], mult: +(1.7 + i * 0.04).toFixed(2) });
+  });
+
+  // ---- 5) More eggs (+10, 120 new cats). Odds shift toward rarer cats the higher you go ----
+  const NEW_EGGS = [
+   { name:'Candy Egg', icon:'🍭', pets:{ C:'🍬 Gumdrop Kitten,🍫 Cocoa Cat,🧁 Cupcake Cat', U:'🍭 Lollipop Lynx,🍩 Donut Tabby', R:'🎂 Cake Cat,🍦 Sundae Sphynx', E:'🍰 Sugar Sovereign,🍯 Honey Hexcat', L:'🏰 Gingerbread Guardian', M:'🎠 Carnival Candy King', D:'🌈 Sugar Rush Supreme' }},
+   { name:'Jungle Egg', icon:'🌴', pets:{ C:'🌴 Palm Kitten,🐒 Vine Swinger,🦜 Parrot Pal', U:'🐍 Python Purr,🦎 Gecko Cat', R:'🐆 Jaguar Jr,🦧 Canopy Climber', E:'🌺 Orchid Panther,🦏 Rhino Roar', L:'🐅 Jungle Emperor', M:'🌳 Ancient Grove Spirit', D:'🦚 Rainforest Plume' }},
+   { name:'Pharaoh Egg', icon:'🔺', pets:{ C:'🏜️ Dune Kitten,🐪 Camel Cat,🪲 Scarab Cat', U:'🏺 Urn Guard,📿 Amulet Cat', R:'🔺 Pyramid Prowler,🐈‍⬛ Bastet’s Heir', E:'⚱️ Canopic Cat,🧿 Eye of Ra Cat', L:'👁️ Sphinx Sovereign', M:'☀️ Ra’s Chosen', D:'🌅 Pharaoh of Eternity' }},
+   { name:'Steam Egg', icon:'🚂', pets:{ C:'⚙️ Cog Kitten,🚂 Locomotive Cat,🔩 Bolt Cat', U:'🎩 Top-Hat Tabby,🕰️ Gearwork Cat', R:'🎈 Airship Captain,🔧 Tinker Tom', E:'🤖 Brass Automaton,🔭 Aether Seer', L:'🏭 Steam Baron', M:'⚡ Tesla Titan', D:'🛠️ Grand Engineer Omni' }},
+   { name:'Olympus Egg', icon:'🏛️', pets:{ C:'🏺 Amphora Kitten,🍇 Vineyard Cat,🫒 Olive Cat', U:'🏹 Archer Cat,🛡️ Hoplite Cat', R:'🐎 Pegasus Kitten,🔥 Hearth Keeper', E:'⚡ Zeus’s Whisker,🌊 Poseidon’s Paw', L:'🦉 Athena’s Owlcat', M:'🌞 Apollo Ascendant', D:'👑 Titan of Olympus' }},
+   { name:'Zodiac Egg', icon:'♈', pets:{ C:'♈ Ram Kitten,♉ Bull Cat,♊ Twin Tabbies', U:'♋ Crab Cat,♌ Lion Cub', R:'♍ Virgo Cat,♎ Scales Cat', E:'♏ Scorpio Stalker,♐ Archer Centaur', L:'♒ Aquarius Aura', M:'♓ Pisces Prodigy', D:'🌌 Zodiac Overlord' }},
+   { name:'Elemental Egg', icon:'🌪️', pets:{ C:'💧 Water Kitten,🔥 Fire Kitten,🌱 Earth Kitten', U:'💨 Air Kitten,⚡ Spark Kitten', R:'🌋 Magma Cat,🌊 Tsunami Cat', E:'🌪️ Tornado Cat,🪨 Quake Cat', L:'☄️ Meteor Mage', M:'🔆 Prism Primordial', D:'🌀 Element Eternal' }},
+   { name:'Chaos Egg', icon:'🎲', pets:{ C:'🎲 Dice Kitten,🃏 Joker Cat,🎰 Slot Cat', U:'🔀 Shuffle Cat,🎭 Trickster Tom', R:'🌀 Entropy Cat,💥 Havoc Cat', E:'🧨 Mayhem Mog,🎪 Ringmaster of Ruin', L:'🌩️ Storm of Chance', M:'🕳️ Maw of Mayhem', D:'🎆 Chaos Incarnate' }},
+   { name:'Genesis Egg', icon:'🌱', pets:{ C:'🌱 Sprout Kitten,💧 Dewdrop Cat,🌞 First Light Cat', U:'🌿 Seedling Sage,🍃 Breeze Cat', R:'🌳 Elder Oak Cat,🪺 Nest Guardian', E:'🌅 Dawnbringer,🌍 Terra Tabby', L:'🌌 Cosmos Sculptor', M:'✨ Spark of Creation', D:'🐈 The First Cat' }},
+   { name:'Creator Egg', icon:'💫', pets:{ C:'🎨 Palette Kitten,✏️ Sketch Cat,🖌️ Brush Cat', U:'🪄 Wand Weaver,📐 Blueprint Cat', R:'🏗️ Architect Cat,🎼 Composer Cat', E:'🧬 Life Designer,🔨 World Smith', L:'👁️ Eye of Creation', M:'🌠 Dream Maker', D:'🙌 The Creator Cat' }}
+  ];
+  const FROM = [2, 6, 20, 31, 27, 12, 2], TO = [.5, 1.5, 8, 25, 38, 22, 5];
+  NEW_EGGS.forEach((x, k) => {
+    const ei = eggsData.length, t = (k + 1) / NEW_EGGS.length;
+    const egg = { name: x.name, icon: x.icon, pets: x.pets, list: [],
+      cost: 3e33 * Math.pow(80, k + 1),                        // each egg costs x80 the last
+      odds: FROM.map((v, j) => +(v + (TO[j] - v) * t).toFixed(1)) };
+    RKEYS.forEach(r => (egg.pets[r] || '').split(',').filter(Boolean).forEach((s, i) => {
+      const [icon, name] = split(s), id = `e${ei}${r}${i}`;
+      PETS[id] = { id, icon, name, rar: r, mult: RAR[r].b * tierScale(ei), egg: ei };
+      egg.list.push(id);
+    }));
+    eggsData.push(egg);
+  });
+
+  // Pet boost cap raised from 9x to 41x so the new eggs actually matter
+  window.getPetMultiplier = () =>
+    1 + Math.min(40, state.equipped.reduce((s, id) => s + (PETS[id] ? PETS[id].mult : 0), 0));
+
+  // ---- 6) More achievements (+18) ----
+  [[18,'Quintillionaire','💸'],[24,'Septillionaire','🏦'],[30,'Nonillionaire','🪙'],[36,'Undecillionaire','🎰'],
+   [42,'Tredecillionaire','🏰'],[48,'Pat Pharaoh','🔺'],[54,'Pat Deity','🌟'],[60,'Pat Universe','🌌'],
+   [75,'Beyond Counting','♾️'],[90,'The End?','🏁']
+  ].forEach(([e, name, icon]) => achievements.push({ id: 'x' + e, name, icon, desc: `Reach 1e${e} total pats.`, req: () => state.totalPats >= Math.pow(10, e) }));
+  [[100,'Egg Machine','🥚'],[1000,'Egg Factory','🏭'],[10000,'Egg Overlord','👑']]
+    .forEach(([n, name, icon]) => achievements.push({ id: 'xe' + n, name, icon, desc: `Hatch ${n.toLocaleString()} eggs.`, req: () => state.eggsOpened >= n }));
+  [[10,'Cycle of Cats','🔁'],[50,'Eternal Return','🌀'],[100,'Hundred Lives','💯'],[500,'Beyond Death','☠️']]
+    .forEach(([n, name, icon]) => achievements.push({ id: 'xr' + n, name, icon, desc: `Reincarnate ${n} times.`, req: () => state.prestigeCount >= n }));
+  achievements.push({ id: 'xp300', name: 'Cat Omniscient', icon: '🧠', desc: 'Discover 300 different cats.', req: () => Object.keys(state.pets).length >= 300 });
+
+  // ---- 7) Anti jitter-click / auto-click ----
+  const MAX_CPS = 10;            // change this number to allow more or fewer clicks per second
+  const gaps = [];
+  let log = [], lastOk = 0, lockUntil = 0, lastWarn = 0;
+  const warn = (m) => { const t = performance.now(); if (t - lastWarn > 3000) { lastWarn = t; showToast(m, '🐾'); } };
+  window.addEventListener('click', (e) => {
+    if (!e.target.closest || !e.target.closest('#cat-btn')) return;
+    const now = performance.now();
+    let ok = e.isTrusted && e.detail > 0;                       // blocks scripts and held Enter/Space
+    if (ok && now < lockUntil) { ok = false; warn('Auto-clicking paused for a few seconds.'); }
+    if (ok) {
+      log = log.filter(t => now - t < 1000);
+      if (log.length >= MAX_CPS || now - lastOk < 60) { ok = false; warn(`Slow down! Max ${MAX_CPS} clicks per second.`); }
+    }
+    if (ok) {
+      log.push(now);
+      if (lastOk) gaps.push(now - lastOk);
+      lastOk = now;
+      if (gaps.length > 25) gaps.shift();
+      if (gaps.length === 25) {                                  // robot-perfect timing = auto-clicker
+        const mean = gaps.reduce((a, b) => a + b) / 25;
+        const sd = Math.sqrt(gaps.reduce((a, b) => a + (b - mean) ** 2, 0) / 25);
+        if (mean < 250 && sd < 5) { lockUntil = now + 8000; gaps.length = 0; ok = false; warn('Auto-clicker detected! Paused for 8 seconds.'); }
+      }
+    }
+    if (!ok) e.stopImmediatePropagation();
+  }, true);
+})();
+</script>
 </body>
 </html>
