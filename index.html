@@ -1094,7 +1094,76 @@ window.addEventListener('DOMContentLoaded', loadGame);
   }, true);
 })();
 </script>
+    <script>
+// ======== AUTO-CLICKER (in-game upgrade) ========
+(() => {
+  const RATE_PER_LEVEL = 1;   // auto-clicks per second added by each level
+  const EFFICIENCY = 0.25;    // each auto-click gives 25% of your normal click power
+  const COSTS = [1e4, 1e7, 1e10, 1e13, 1e16, 1e19, 1e22, 1e25, 1e28, 1e31];   // cost of each level
+  const lvl = () => Math.min(COSTS.length, state.autoLevel || 0);
+  const rate = () => lvl() * RATE_PER_LEVEL;
+  const set = (el, v) => { if (el.textContent !== v) el.textContent = v; };
+
+  // Panel at the top of the Boosts tab
+  const tab = document.getElementById('boosts-tab');
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.innerHTML = `<h3 class="panel-title"><span>🤖 Auto-Clicker</span>
+      <span style="font-size:13px;color:var(--text-light)">Permanent. Keeps working after you reincarnate.</span></h3>
+    <div class="upgrade-card" style="cursor:default">
+      <div class="upgrade-icon">🐾</div>
+      <div class="upgrade-details">
+        <div class="upgrade-name">Auto-Paw <span id="auto-lvl"></span></div>
+        <div class="upgrade-effect" id="auto-info"></div>
+        <div class="upgrade-cost" id="auto-cost"></div>
+      </div>
+      <button class="btn-action" id="auto-buy">Buy</button>
+    </div>`;
+  tab.insertBefore(panel, tab.firstChild);
+
+  // Small line on the Game tab
+  const line = document.createElement('div');
+  line.className = 'pps-counter';
+  document.querySelector('.score-board').insertBefore(line, document.getElementById('equipped-bar'));
+
+  const lvlEl = document.getElementById('auto-lvl'), info = document.getElementById('auto-info'),
+        costEl = document.getElementById('auto-cost'), btn = document.getElementById('auto-buy');
+
+  function refresh() {
+    const L = lvl(), max = L >= COSTS.length;
+    set(lvlEl, `(Lv ${L}/${COSTS.length})`);
+    set(info, L ? `${rate()} auto-click${rate() === 1 ? '' : 's'} per second, each worth ${Math.round(EFFICIENCY * 100)}% of your click power`
+                : 'Not bought yet. It clicks the cat for you.');
+    set(line, L ? `Auto-clicker: ${rate()} clicks/sec` : '');
+    if (max) {
+      set(costEl, '✅ Max level'); set(btn, 'MAX');
+      btn.classList.add('disabled'); btn.removeAttribute('data-cost');
+    } else {
+      const c = COSTS[L];
+      set(costEl, `Next level: ${formatNumber(c)} pats (+${RATE_PER_LEVEL}/sec)`);
+      set(btn, L ? 'Upgrade' : 'Buy');
+      btn.dataset.cost = c;
+      btn.classList.toggle('disabled', state.pats < c);
+    }
+  }
+  btn.onclick = () => {
+    const L = lvl();
+    if (L >= COSTS.length || state.pats < COSTS[L]) return;
+    state.pats -= COSTS[L]; state.autoLevel = L + 1;
+    audioEngine.playSound('buy');
+    showToast(`Auto-Clicker level ${L + 1}! ${(L + 1) * RATE_PER_LEVEL} clicks/sec`, '🤖');
+    refresh(); saveGame(false);
+  };
+  setInterval(refresh, 250);
+
+  // The auto-clicking itself (uses real elapsed time, so it stays accurate if the tab lags)
+  let last = performance.now();
+  setInterval(() => {
+    const now = performance.now(), dt = Math.min(1, (now - last) / 1000); last = now;
+    const r = rate(); if (!r) return;
+    const gain = calculateClickPower() * EFFICIENCY * r * dt;
+    state.pats += gain; state.totalPats += gain; state.runPats += gain;
+  }, 100);
+})();
 </script>
-
-
-  
+</script>
