@@ -1166,4 +1166,26 @@ window.addEventListener('DOMContentLoaded', loadGame);
   }, 100);
 })();
 </script>
+    <script>
+// ======== LOWER REINCARNATION GOAL ========
+(() => {
+  const GOAL = 5e6;   // pats needed in one run for your first Golden Paw (5e6 = 5 million)
+
+  window.calculatePendingGoldenPaws = () => {
+    if (state.runPats < GOAL) return 0;
+    return Math.max(0, Math.floor(Math.pow(state.runPats / GOAL, 0.25)));
+  };
+
+  window.doPrestige = () => {
+    const pending = calculatePendingGoldenPaws();
+    if (pending <= 0) { alert(`Earn at least ${formatNumber(GOAL)} pats in this run to earn Golden Paws. Reincarnation rewards grow with each run.`); return; }
+    if (confirm(`Reincarnate now for +${formatNumber(pending)} Golden Paws?\n\nThis resets your current-run pats, buildings and boosts. Golden Paws and all your pets stay!`)) {
+      state.goldenPaws += pending; state.prestigeCount++;
+      state.pats = 0; state.runPats = 0; state.upgrades = {};
+      saveGame(true); renderShops(); renderBoosts(); updateDisplay(); submitScore();
+      showToast("Reincarnated successfully!", "🐾");
+    }
+  };
+})();
+</script>
 </script>
