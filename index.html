@@ -1562,4 +1562,108 @@ aura|🌈|Rainbow Aura|1e15|#ff4081`.split('\n').map((l, i) => {
   }, 500);
 })();
 </script>
+    <script>
+// ======== DAILY REWARD (7-day streak) ========
+(() => {
+  const $$ = (id) => document.getElementById(id);
+  const DAYS = [
+    { icon: '💰', label: 'Pats',               kind: 'pats', min: 10 },
+    { icon: '💰', label: 'Pats',               kind: 'pats', min: 15 },
+    { icon: '🥚', label: '1 free hatch',       kind: 'egg',  n: 1 },
+    { icon: '💰', label: 'Pats',               kind: 'pats', min: 30 },
+    { icon: '🥚', label: '3 free hatches',     kind: 'egg',  n: 3 },
+    { icon: '💰', label: 'Pats',               kind: 'pats', min: 60 },
+    { icon: '👑', label: 'Legendary cat + pats', kind: 'big', min: 120 }
+  ];
+  // "min" = minutes of your current passive income. Rewards never go below 1,000 x the day number.
+
+  const css = document.createElement('style');
+  css.textContent = '@keyframes drPulse{0%{box-shadow:0 0 0 0 rgba(243,156,18,.7)}100%{box-shadow:0 0 0 12px rgba(243,156,18,0)}}'
+    + '#dr-btn.ready{animation:drPulse 1.2s infinite}#dr-btn{white-space:nowrap}'
+    + '.dr-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.dr-day{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;border:2px solid rgba(150,150,150,.3);font-size:10px;font-weight:800;line-height:1.2}'
+    + '.dr-day span{font-size:22px}.dr-day.done{opacity:.45}.dr-day.next{border-color:var(--gold);background:rgba(241,196,15,.15)}';
+  document.head.appendChild(css);
+
+  const dayStart = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const D = () => (state.daily = state.daily || { streak: 0, last: 0, ts: 0 });
+
+  function status() {
+    const d = D(), now = Date.now(), today = dayStart(new Date(now));
+    if (now < d.ts) return { can: false, why: 'clock' };            // device clock was wound back
+    if (d.last === today) return { can: false, why: 'done' };
+    const gap = d.last ? Math.round((today - d.last) / 86400000) : 99;
+    const streak = gap === 1 ? d.streak + 1 : 1;                    // miss a day and the streak restarts
+    return { can: true, streak, day: (streak - 1) % 7 };
+  }
+  // The egg used for free hatches and the Legendary: the best egg that fits your progress
+  function dailyEgg() {
+    let ei = 0; const lim = Math.max(250, state.totalPats / 50);
+    eggsData.forEach((e, i) => { if (e.cost <= lim) ei = i; });
+    return ei;
+  }
+  const patsFor = (day) => Math.floor(Math.max(1000 * (day + 1), calculatePPS() * 60 * (DAYS[day].min || 0)));
+  const give = (id) => { state.pets[id] = (state.pets[id] || 0) + 1; return `${PETS[id].icon} ${PETS[id].name}`; };
+
+  function claim() {
+    const s = status(); if (!s.can) return;
+    const r = DAYS[s.day], d = D(), got = [], ei = dailyEgg();
+    if (r.kind === 'pats' || r.kind === 'big') { const g = patsFor(s.day); state.pats += g; got.push(`+${formatNumber(g)} pats`); }
+    if (r.kind === 'egg') { for (let i = 0; i < r.n; i++) got.push(give(rollPet(ei))); state.eggsOpened += r.n; }
+    if (r.kind === 'big') {
+      const L = eggsData[ei].list.filter(id => PETS[id].rar === 'L'), M = eggsData[ei].list.filter(id => PETS[id].rar === 'M');
+      const pool = (M.length && Math.random() < 0.15) ? M : L;
+      got.push(give(pool[Math.floor(Math.random() * pool.length)]));
+    }
+    d.streak = s.streak; d.last = dayStart(new Date()); d.ts = Date.now();
+    audioEngine.playSound('golden'); refreshPets(); checkAchievements(); saveGame(false);
+    showToast(`Daily reward claimed! ${got.join(', ')}`, '🎁');
+    render(got);
+  }
+
+  // ---------- Popup ----------
+  const modal = document.createElement('div');
+  modal.className = 'modal'; modal.id = 'dr-modal';
+  modal.innerHTML = '<div class="modal-box" style="max-width:560px" id="dr-box"></div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+  function render(justGot) {
+    const s = status(), d = D();
+    const claimed = s.can ? s.day : (d.streak ? ((d.streak - 1) % 7) + 1 : 0);
+    const tiles = DAYS.map((x, i) => `<div class="dr-day ${i < claimed ? 'done' : i === claimed ? 'next' : ''}">
+      Day ${i + 1}<span>${i < claimed ? '✅' : x.icon}</span>${x.label}</div>`).join('');
+    const preview = s.can ? DAYS[s.day] : DAYS[claimed % 7], pd = s.can ? s.day : claimed % 7;
+    $$('dr-box').innerHTML = `<div style="font-size:48px">🎁</div><h2 style="margin:0">Daily Reward</h2>
+      <div style="font-size:13px;color:var(--text-light)">Come back every day to keep your streak going. Miss a day and it restarts. Day 7 gives a Legendary cat!</div>
+      <div class="dr-grid">${tiles}</div>
+      ${justGot ? `<div style="font-weight:800;color:#2ecc71">You got: ${justGot.join(', ')}</div>` : ''}
+      <div style="font-size:13px;font-weight:700">${s.can
+        ? `Today's reward: ${preview.kind === 'egg' ? preview.label : preview.kind === 'big' ? `${preview.label} (about ${formatNumber(patsFor(pd))} pats)` : `about ${formatNumber(patsFor(pd))} pats`}`
+        : s.why === 'clock' ? 'Your device clock looks wrong. Fix it to claim.'
+        : `Already claimed! Next reward in ${untilMidnight()}. Streak: ${d.streak} day${d.streak === 1 ? '' : 's'}.`}</div>
+      ${s.can ? '<button class="btn-action btn-gold" id="dr-claim" style="font-size:18px">🎁 Claim reward</button>' : ''}
+      <button class="btn-action btn-ghost" id="dr-close">Close</button>`;
+    if (s.can) $$('dr-claim').onclick = claim;
+    $$('dr-close').onclick = () => { modal.style.display = 'none'; };
+    label();
+  }
+
+  // ---------- Header button (sits in the gap next to the title / news ticker) ----------
+  const btn = document.createElement('button');
+  btn.className = 'btn-action btn-gold'; btn.id = 'dr-btn';
+  (document.getElementById('hd-box') || document.querySelector('.logo-title')).after(btn);
+  btn.onclick = () => { render(); modal.style.display = 'flex'; };
+
+  function untilMidnight() {
+    const n = new Date(), ms = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1).getTime() - n.getTime();
+    return `${Math.floor(ms / 3600000)}h ${Math.floor(ms % 3600000 / 60000)}m`;
+  }
+  function label() {
+    const s = status(), t = s.can ? '🎁 Claim Daily!' : s.why === 'clock' ? '🎁 Check clock' : `🎁 Back in ${untilMidnight()}`;
+    if (btn.textContent !== t) btn.textContent = t;
+    btn.classList.toggle('ready', s.can);
+  }
+  label(); setInterval(label, 1000);
+})();
+</script>
 </script>
