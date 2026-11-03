@@ -1487,4 +1487,79 @@ aura|🌈|Rainbow Aura|1e15|#ff4081`.split('\n').map((l, i) => {
   });
 })();
 </script>
+    <script>
+// ======== MORE UPGRADES (+40 click, +40 buildings, +14 boosts) + HEADER NEWS TICKER ========
+(() => {
+  const split = (s) => { const i = s.indexOf(' '); return [s.slice(0, i), s.slice(i + 1)]; };
+
+  // More number names, up to 1e123 (after that it shows like 1.23e126)
+  if (SUF.length === 32) SUF.push('Utg','Dtg','Ttg','Qatg','Qitg','Sxtg','Sptg','Octg','Notg','Qag');
+
+  // Each new tier continues from your current last upgrade. First tier: cost x9, gain x7. Then cost x12, gain x8.5 per tier.
+  const extend = (list, prefix, names, gainKey) => names.forEach((s, i) => {
+    const [icon, name] = split(s), last = list[list.length - 1];
+    list.push({ id: prefix + (list.length + 1), name, icon,
+      cost: last.cost * (i === 0 ? 9 : 12), [gainKey]: last[gainKey] * (i === 0 ? 7 : 8.5) });
+  });
+
+  extend(clickUpgrades, 'c', [
+    '🔱 Poseidon’s Pat','⚔️ Excalibur Claw','🌩️ Stormcaller Glove','🪬 Fate Fingers','🧪 Alchemist Mitts','🔬 Atom Tickler','🧲 Magnet Mitts','💠 Crystal Claw','🎇 Nova Knuckles','🪐 Ringed Palm',
+    '🌑 Eclipse Grip','☄️ Comet Caress','🛡️ Aegis Gauntlet','🦅 Phoenix Feather','🐉 Dragon Talon','🧙 Archmage Glove','🗝️ Key to Purrdom','📡 Quasar Stroke','🌐 Worldwide Pat','🕸️ Cosmic Web Mitts',
+    '🎻 Maestro Paws','🏹 Hunter’s Touch','🪓 Titan Cleaver Paw','🧿 All-Seeing Mitt','🌺 Bloom Bringer','🌊 Tsunami Tap','🪶 Angelic Quill','🔔 Resonant Pat','🕯️ Ritual Rub','🗿 Monolith Palm',
+    '⏱️ Quantum Quick-Pat','🛸 Mothership Mitt','🧠 Omniscient Touch','🌈 Prism Gauntlet','♾️ Infinite Glove II','🌅 Genesis Hand','💫 Stardust Grip','🌌 Cosmos Clutch','🌠 Final Frontier Pat','👁️ Eye of Eternity'
+  ], 'power');
+
+  extend(passiveUpgrades, 'p', [
+    '🏙️ Neon Cat City','🚉 Interstellar Station','🏗️ Skyforge Works','🧬 Cat Genome Lab','🗄️ Infinite Treat Vault','🪐 Cat Planet Chain','🛰️ Purr Satellite Grid','🌋 Magma Cat Foundry','🐳 Whale Cat Fleet','🏰 Citadel of Purrs',
+    '🌠 Meteor Mining Colony','🕳️ Wormhole Warehouse','🔭 Deep Space Nap Deck','⛩️ Shrine of Nine Lives','🌞 Solar Cat Farm','🧪 Elixir Brewery','🎰 Fortune Feline Casino','📚 Library of Meows','🪞 Reflection Realm','🎭 Theater of Whiskers',
+    '🌀 Spiral Galaxy Den','🏯 Pagoda of Perpetual Purrs','🛕 Temple of Treats','🌴 Paradise Cat Resort','🚀 Hyperdrive Dockyard','🧵 Thread of Destiny Mill','🕰️ Eternity Clock Tower','⚡ Lightning Cat Reactor','🌌 Nebula Nap Network','🏛️ Parliament of Paws',
+    '🔮 Crystal Ball Cat Oracle','🎆 Supernova Spa','🗺️ Cartographers of Cats','🧊 Cryo-Nap Cathedral','🌊 Ocean of Cat Dreams','🪽 Winged Cat Armada','🔱 Trident Tower of Time','💎 Diamond Dream Dome','🌅 Horizon Engine','🐈 Mother of All Cats'
+  ], 'pps');
+
+  // More boosts: each costs x30 the last, multiplier grows 2.0 -> 2.65
+  const types = ['all', 'click', 'pps', 'all', 'all'];
+  ['🥩 Wagyu Feast','🛁 Spa Day','🎬 Cat Movie Night','🏖️ Beach Holiday','🎂 Birthday Bash','🎹 Piano Purrs','🧘 Zen Garden','🛌 Cloud Bed','🍵 Tea Ceremony','🎡 Funfair Day','🌠 Wishing Star','🪄 Grand Illusion','🌈 Rainbow Bridge','👑 Cat Coronation']
+  .forEach((s, i) => {
+    const [icon, name] = split(s), last = boosts[boosts.length - 1];
+    boosts.push({ id: 'b' + (boosts.length + 1), name, icon, cost: last.cost * 30, type: types[i % 5], mult: +(2 + i * 0.05).toFixed(2) });
+  });
+
+  // ---------- Header: cat news ticker + live stats (fills the gap next to the title) ----------
+  const css = document.createElement('style');
+  css.textContent = '#hd-box{flex:1;min-width:200px;max-width:440px;display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:var(--text-light);text-align:center;overflow:hidden}'
+    + '#hd-news{transition:opacity .5s;min-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hd-stats{color:var(--text-dark)}#hd-stats b{color:var(--gold)}'
+    + '@media(max-width:1350px){#hd-box{display:none}}';
+  document.head.appendChild(css);
+
+  const NEWS = [
+    () => `📰 Local cat has ${formatNumber(state.totalPats)} pats and still wants more.`,
+    () => `📰 Scientists confirm: ${formatNumber(state.eggsOpened)} eggs hatched, zero omelettes made.`,
+    () => '📰 Breaking: cat knocks cup off table. Experts are "not surprised".',
+    () => '📰 Tip: equip your 4 best cats in Cat Alley for a bigger boost.',
+    () => '📰 Tip: golden cats only stay for 8 seconds. Be quick!',
+    () => '📰 Study finds cats sleep 16 hours a day. Yours work harder.',
+    () => '📰 Tip: boosts reset when you reincarnate, but your cats stay.',
+    () => '📰 Cat stock market soars after yarn shortage.',
+    () => `📰 ${state.username || 'A mysterious player'} spotted patting a cat with great determination.`,
+    () => '📰 Mayor announces nap hour will now last all day.',
+    () => '📰 Cat sits in box that is too small. Box declared a victory.',
+    () => `📰 Breaking: ${formatNumber(calculatePPS())} pats are being made every second.`,
+    () => '📰 Local cat refuses to explain 3am zoomies.',
+    () => '📰 Tip: reincarnate for Golden Paws, a permanent production boost.'
+  ];
+  const box = document.createElement('div');
+  box.id = 'hd-box';
+  box.innerHTML = '<div id="hd-news"></div><div id="hd-stats"></div>';
+  document.querySelector('.logo-title').after(box);
+  const news = box.querySelector('#hd-news'), stats = box.querySelector('#hd-stats');
+  let n = Math.floor(Math.random() * NEWS.length);
+  const show = () => { news.style.opacity = 0; setTimeout(() => { news.textContent = NEWS[n++ % NEWS.length](); news.style.opacity = 1; }, 500); };
+  show(); setInterval(show, 9000);
+  setInterval(() => {
+    const p = calculatePendingGoldenPaws();
+    stats.innerHTML = `⚡ ${formatNumber(calculatePPS(), 1)}/s · 🥚 ${formatNumber(state.eggsOpened)}`
+      + (p > 0 ? ` · <b>🐾 +${formatNumber(p)} paws ready!</b>` : '');
+  }, 500);
+})();
+</script>
 </script>
