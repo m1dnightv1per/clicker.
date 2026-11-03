@@ -1696,4 +1696,97 @@ aura|🌈|Rainbow Aura|1e15|#ff4081`.split('\n').map((l, i) => {
   }, true);
 })();
 </script>
+    <script>
+// ======== CAT SLOTS (standalone tab) ========
+(() => {
+  try {
+    const $$ = (id) => document.getElementById(id);
+    const fmt = (n) => formatNumber(n);
+    // [symbol, chance %, payout multiplier for 3 in a row]
+    const SYM = [['🐱', 40, 6], ['🐟', 25, 12], ['🧶', 15, 30], ['⭐', 10, 80], ['💎', 6, 200], ['👑', 4, 500]];
+    let cur = 'pats', busy = false;
+
+    const css = document.createElement('style');
+    css.textContent = '.sm-reels{display:flex;gap:10px;justify-content:center}'
+      + '.sm-reel{width:96px;height:96px;border-radius:16px;background:rgba(0,0,0,.06);border:3px solid var(--accent-main);display:flex;align-items:center;justify-content:center;font-size:56px}'
+      + '.sm-reel.win{border-color:#f1c40f;box-shadow:0 0 22px #f1c40f}'
+      + '.sm-in{padding:10px;border-radius:10px;border:2px solid var(--accent-main);font-size:16px;width:170px;background:var(--card-bg);color:var(--text-dark)}'
+      + '.sm-msg{font-weight:800;min-height:24px;text-align:center;font-size:16px}.sm-note{font-size:12px;color:var(--text-light);text-align:center}';
+    document.head.appendChild(css);
+
+    const tab = document.createElement('div');
+    tab.id = 'slots-tab'; tab.className = 'app-container one-col'; tab.style.display = 'none';
+    tab.innerHTML = '<div class="panel">'
+      + '<h3 class="panel-title"><span>🎰 Cat Slots</span><span style="font-weight:800">Balance: <span id="sm-bal" style="color:var(--gold)"></span></span></h3>'
+      + '<div class="row-btns"><button class="btn-action btn-ghost" id="sm-pats">Bet Pats</button><button class="btn-action btn-ghost" id="sm-paws">Bet Golden Paws</button></div>'
+      + '<div class="sm-reels"><div class="sm-reel" id="sm-r0">🐱</div><div class="sm-reel" id="sm-r1">🐱</div><div class="sm-reel" id="sm-r2">🐱</div></div>'
+      + '<div class="sm-msg" id="sm-msg">Place a bet and spin!</div>'
+      + '<div class="row-btns" style="justify-content:center"><input class="sm-in" id="sm-bet" type="number" min="1" value="100">'
+      + '<button class="btn-action btn-ghost" data-f="0.1">10%</button><button class="btn-action btn-ghost" data-f="0.25">25%</button>'
+      + '<button class="btn-action btn-ghost" data-f="0.5">50%</button><button class="btn-action btn-ghost" data-f="1">Max</button></div>'
+      + '<div class="row-btns" style="justify-content:center"><button class="btn-action btn-gold" id="sm-spin" style="font-size:20px;padding:12px 44px">SPIN</button></div>'
+      + '<div class="sm-note">3 in a row pays: ' + SYM.map(s => s[0] + '×' + s[2]).join(' · ') + '<br>A pair of ⭐ / 💎 / 👑 returns your bet. Winnings here do not count toward leaderboard Total Pats.</div>'
+      + '</div>';
+    document.body.insertBefore(tab, $$('toast-container'));
+
+    const nav = document.querySelector('.nav-tabs');
+    const tb = document.createElement('button');
+    tb.className = 'tab-btn'; tb.textContent = '🎰 Slots';
+    tb.onclick = (e) => { switchTab('slots', e); draw(); };
+    nav.appendChild(tb);
+    if (typeof TABS !== 'undefined' && !TABS.includes('slots')) TABS.push('slots');
+
+    const bal = () => Math.floor(cur === 'pats' ? state.pats : state.goldenPaws);
+    const unit = () => cur === 'pats' ? 'pats' : 'Golden Paws';
+    const change = (n) => {
+      if (cur === 'pats') state.pats += n; else state.goldenPaws += n;
+      try { saveGame(false); updateDisplay(); } catch (e) {}
+    };
+    const say = (t, good) => { const m = $$('sm-msg'); m.textContent = t; m.style.color = good === true ? '#2ecc71' : good === false ? '#e74c3c' : ''; };
+    const draw = () => {
+      $$('sm-bal').textContent = fmt(bal()) + ' ' + unit();
+      $$('sm-pats').classList.toggle('active', cur === 'pats');
+      $$('sm-paws').classList.toggle('active', cur === 'paws');
+    };
+    const pick = () => { let r = Math.random() * 100; for (const s of SYM) { r -= s[1]; if (r < 0) return s; } return SYM[0]; };
+
+    $$('sm-pats').onclick = () => { if (!busy) { cur = 'pats'; draw(); } };
+    $$('sm-paws').onclick = () => { if (!busy) { cur = 'paws'; draw(); } };
+    tab.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { $$('sm-bet').value = Math.max(1, Math.floor(bal() * Number(b.dataset.f))); });
+
+    $$('sm-spin').onclick = () => {
+      if (busy) return;
+      const bet = Math.floor(Number($$('sm-bet').value));
+      if (!(bet >= 1)) return say('Enter a bet of at least 1.');
+      if (bet > bal()) return say("You don't have that many " + unit() + '.', false);
+      busy = true;
+      const res = [pick(), pick(), pick()];
+      let mult = 0;
+      if (res[0][0] === res[1][0] && res[1][0] === res[2][0]) mult = res[0][2];
+      else for (const s of SYM.slice(3)) if (res.filter(r => r[0] === s[0]).length === 2) mult = 1;
+      change(-bet + bet * mult);                    // bet and winnings are settled and saved right now
+      const reels = [0, 1, 2].map(i => $$('sm-r' + i)), stopped = [false, false, false];
+      reels.forEach(r => r.classList.remove('win'));
+      say('Spinning…');
+      const iv = setInterval(() => reels.forEach((r, i) => { if (!stopped[i]) r.textContent = SYM[Math.floor(Math.random() * SYM.length)][0]; }), 70);
+      [500, 900, 1300].forEach((t, i) => setTimeout(() => {
+        stopped[i] = true; reels[i].textContent = res[i][0];
+        if (i < 2) return;
+        clearInterval(iv); busy = false;
+        if (mult > 1) {
+          reels.forEach(r => r.classList.add('win'));
+          say((mult >= 80 ? 'JACKPOT! ' : '') + '×' + mult + '! You won ' + fmt(bet * mult - bet) + ' ' + unit() + '!', true);
+          try { audioEngine.playSound('golden'); } catch (e) {}
+        } else if (mult === 1) say('A pair! Your bet is returned.');
+        else say('No match. You lost ' + fmt(bet) + ' ' + unit() + '.', false);
+        draw();
+      }, t));
+    };
+    draw();
+  } catch (err) {
+    console.error('Cat Slots failed to load:', err);
+    try { showToast('Cat Slots failed to load: ' + err.message, '⚠️'); } catch (e) {}
+  }
+})();
+</script>
 </script>
