@@ -1666,34 +1666,5 @@ aura|🌈|Rainbow Aura|1e15|#ff4081`.split('\n').map((l, i) => {
   label(); setInterval(label, 1000);
 })();
 </script>
-    <script>
-// ======== CLICK SPEED LIMIT (replaces the old limits) ========
-(() => {
-  const MAX_PER_SEC = 15, MAX_PER_5S = 70, MIN_GAP = 40;   // change these to loosen or tighten it
-  const btn = document.getElementById('cat-btn');
-  if (!btn) return;
-  btn.id = 'cat-btn-fast';   // the old limits only watch #cat-btn, so they now ignore the cat
-
-  let t5 = [], strikes = [], lock = 0, lastOk = 0, lastNote = 0;
-  const note = (m) => { const n = performance.now(); if (n - lastNote > 2500) { lastNote = n; showToast(m, '🐾'); } };
-
-  window.addEventListener('click', (e) => {
-    if (!e.target.closest || !e.target.closest('#cat-btn-fast')) return;
-    const now = performance.now();
-    let ok = e.isTrusted && e.detail > 0;                  // blocks scripts and held Enter/Space
-    if (ok && now < lock) { ok = false; note('Your cat is resting after jitter-clicking. Wait a moment.'); }
-    else if (ok) {
-      t5 = t5.filter(t => now - t < 5000);
-      const perSec = t5.filter(t => now - t < 1000).length;
-      if (now - lastOk < MIN_GAP || perSec >= MAX_PER_SEC || t5.length >= MAX_PER_5S) {
-        ok = false;
-        strikes = strikes.filter(t => now - t < 3000); strikes.push(now);
-        if (strikes.length >= 8) { lock = now + 4000; strikes = []; note('Too much jitter-clicking! Your cat needs a 4 second break.'); }
-        else note(`Too fast! Max ${MAX_PER_SEC} clicks per second.`);
-      }
-    }
-    if (ok) { t5.push(now); lastOk = now; } else e.stopImmediatePropagation();
-  }, true);
-})();
 </script>
   
