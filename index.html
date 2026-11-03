@@ -1188,4 +1188,303 @@ window.addEventListener('DOMContentLoaded', loadGame);
   };
 })();
 </script>
+    <script>
+// ======== STRICT ANTI-JITTER + CASINO (coin flip, blackjack, slots) + CAT CLOSET ========
+(() => {
+  const $$ = (id) => document.getElementById(id);
+  const fmt = formatNumber;
+
+  // ---------- 1) Anti jitter-click (stricter than before) ----------
+  const MAX_PER_SEC = 7, MAX_PER_5S = 25, MIN_GAP = 90;   // change these to loosen or tighten it
+  let t5 = [], strikes = [], lock = 0, lastOk = 0, lastNote = 0;
+  const note = (m) => { const n = performance.now(); if (n - lastNote > 2500) { lastNote = n; showToast(m, '🐾'); } };
+  window.addEventListener('click', (e) => {
+    if (!e.target.closest || !e.target.closest('#cat-btn')) return;
+    const now = performance.now();
+    let ok = e.isTrusted && e.detail > 0;                  // blocks scripts and held Enter/Space
+    if (ok && now < lock) { ok = false; note('Your cat is resting after jitter-clicking. Wait a moment.'); }
+    else if (ok) {
+      t5 = t5.filter(t => now - t < 5000);
+      const perSec = t5.filter(t => now - t < 1000).length;
+      if (now - lastOk < MIN_GAP || perSec >= MAX_PER_SEC || t5.length >= MAX_PER_5S) {
+        ok = false;
+        strikes = strikes.filter(t => now - t < 3000); strikes.push(now);
+        if (strikes.length >= 6) { lock = now + 4000; strikes = []; note('Jitter-clicking detected! Your cat needs a 4 second break.'); }
+        else note(`Too fast! Max ${MAX_PER_SEC} clicks per second.`);
+      }
+    }
+    if (ok) { t5.push(now); lastOk = now; } else e.stopImmediatePropagation();
+  }, true);
+
+  // ---------- Shared: styles, tabs ----------
+  const css = document.createElement('style');
+  css.textContent = `
+  .cz-big{font-size:90px;line-height:1.1;text-align:center}.cz-msg{font-weight:800;min-height:24px;text-align:center;font-size:16px}
+  .cz-note{font-size:12px;color:var(--text-light);text-align:center}.cz-hand{text-align:center;min-height:84px}
+  .cz-card{display:inline-flex;align-items:center;justify-content:center;width:52px;height:74px;margin:3px;border-radius:8px;background:#fff;color:#222;font-weight:900;font-size:20px;border:2px solid #bbb;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+  .cz-card.red{color:#d32f2f}.cz-card.back{background:repeating-linear-gradient(45deg,#ec407a,#ec407a 6px,#d81b60 6px,#d81b60 12px);color:transparent}
+  .cz-reels{display:flex;gap:10px;justify-content:center}.cz-reel{width:92px;height:92px;border-radius:16px;background:rgba(0,0,0,.06);border:3px solid var(--accent-main);display:flex;align-items:center;justify-content:center;font-size:54px}
+  .cz-in{padding:10px;border-radius:10px;border:2px solid var(--accent-main);font-size:16px;width:180px;background:var(--card-bg);color:var(--text-dark)}
+  .acc{position:absolute;left:50%;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))}
+  .acc-hat{top:-10px;font-size:86px;transform:translateX(-50%) rotate(-10deg)}
+  .acc-face{top:50%;font-size:78px;transform:translate(-50%,-58%)}
+  .acc-neck{bottom:-2px;font-size:60px;transform:translateX(-50%)}`;
+  document.head.appendChild(css);
+
+  const mk = (id, html) => {
+    const d = document.createElement('div');
+    d.id = id; d.className = 'app-container one-col'; d.style.display = 'none'; d.innerHTML = html;
+    document.body.insertBefore(d, $$('toast-container'));
+    return d;
+  };
+  const nav = document.querySelector('.nav-tabs');
+  const addTab = (id, label) => {
+    const b = document.createElement('button');
+    b.className = 'tab-btn'; b.textContent = label; b.onclick = (e) => switchTab(id.replace('-tab', ''), e);
+    nav.appendChild(b);
+  };
+  TABS.push('casino', 'closet');
+  const baseSwitch = window.switchTab;
+  window.switchTab = (id, evt) => { baseSwitch(id, evt); if (id === 'casino') renderCasino(); if (id === 'closet') renderCloset(); };
+
+  // ---------- 2) Casino ----------
+  const casino = mk('casino-tab', `
+    <div class="panel">
+      <h3 class="panel-title"><span>🎰 Cat Casino</span><span style="font-size:12px;color:var(--text-light)">Gambling winnings don't count toward your leaderboard Total Pats. The house has a small edge.</span></h3>
+      <div class="row-btns">
+        <button class="btn-action btn-ghost" id="cz-c-pats" data-a="cur" data-v="pats">Bet Pats</button>
+        <button class="btn-action btn-ghost" id="cz-c-paws" data-a="cur" data-v="paws">Bet Golden Paws</button>
+        <span style="font-weight:800">Balance: <span id="cz-bal" style="color:var(--gold)"></span></span>
+      </div>
+      <div class="row-btns">
+        <input class="cz-in" id="cz-bet" type="number" min="1" value="100">
+        <button class="btn-action btn-ghost" data-a="frac" data-v="0.1">10%</button>
+        <button class="btn-action btn-ghost" data-a="frac" data-v="0.25">25%</button>
+        <button class="btn-action btn-ghost" data-a="frac" data-v="0.5">50%</button>
+        <button class="btn-action btn-ghost" data-a="frac" data-v="1">Max</button>
+      </div>
+      <div class="row-btns">
+        <button class="btn-action btn-ghost" id="cz-g-flip" data-a="game" data-v="flip">🪙 Coin Flip</button>
+        <button class="btn-action btn-ghost" id="cz-g-bj" data-a="game" data-v="bj">🃏 Blackjack</button>
+        <button class="btn-action btn-ghost" id="cz-g-slots" data-a="game" data-v="slots">🎰 Cat Slots</button>
+      </div>
+    </div>
+    <div class="panel" id="cz-game"></div>`);
+  addTab('casino-tab', '🎰 Casino');
+
+  let cur = 'pats', game = 'flip', busy = false, bj = null;
+  const act = {};
+  const bal = () => Math.floor(cur === 'pats' ? state.pats : state.goldenPaws);
+  const add = (n) => { if (cur === 'pats') state.pats += n; else state.goldenPaws += n; };
+  const unit = () => cur === 'pats' ? 'pats' : 'Golden Paws';
+  const pay = (n) => { add(n); saveGame(false); };           // changes your balance and saves right away
+  const sync = () => { updateDisplay(); $$('cz-bal').textContent = `${fmt(bal())} ${unit()}`; };
+  const msg = (t, good) => { const m = $$('cz-msg'); if (m) { m.textContent = t; m.style.color = good === true ? '#2ecc71' : good === false ? '#e74c3c' : ''; } };
+  const locked = () => busy || (bj && !bj.over);
+  function getBet() {
+    const b = Math.floor(Number($$('cz-bet').value));
+    if (!(b >= 1)) { msg('Enter a bet of at least 1.'); return 0; }
+    if (b > bal()) { msg(`You don't have that many ${unit()}.`, false); return 0; }
+    return b;
+  }
+
+  // Coin flip: 48% to win, pays 2x
+  act.flip = (pick) => {
+    if (busy) return; const b = getBet(); if (!b) return;
+    busy = true; pay(-b);
+    const win = Math.random() < 0.48, side = win ? pick : (pick === 'H' ? 'T' : 'H');
+    if (win) pay(b * 2);
+    const coin = $$('cz-coin'); let n = 0; msg('Flipping…');
+    const spin = setInterval(() => { coin.textContent = ['🪙', '🐱'][n++ % 2]; }, 90);
+    setTimeout(() => {
+      clearInterval(spin); coin.textContent = side === 'H' ? '😺' : '🐾';
+      const nm = side === 'H' ? 'Heads' : 'Tails';
+      if (win) { msg(`${nm}! You won ${fmt(b)} ${unit()}!`, true); audioEngine.playSound('golden'); }
+      else msg(`${nm}. You lost ${fmt(b)} ${unit()}.`, false);
+      sync(); busy = false;
+    }, 900);
+  };
+
+  // Blackjack: blackjack pays 3:2, dealer stands on 17
+  const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'], SUITS = ['♠','♥','♦','♣'];
+  const newDeck = () => {
+    const d = []; SUITS.forEach(s => RANKS.forEach(r => d.push({ r, s })));
+    for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+    return d;
+  };
+  const total = (h) => {
+    let t = 0, a = 0;
+    h.forEach(c => { if (c.r === 'A') { a++; t += 11; } else t += 'JQK'.includes(c.r) ? 10 : +c.r; });
+    while (t > 21 && a) { t -= 10; a--; }
+    return t;
+  };
+  const cardHtml = (c, hide) => hide ? '<span class="cz-card back">?</span>'
+    : `<span class="cz-card ${'♥♦'.includes(c.s) ? 'red' : ''}">${c.r}${c.s}</span>`;
+  function drawBJ() {
+    const g = $$('cz-bj'); if (!g) return;
+    if (!bj) { g.innerHTML = '<div class="cz-note">Place your bet, then press Deal.</div><div class="row-btns" style="justify-content:center"><button class="btn-action btn-gold" data-a="deal">Deal</button></div>'; return; }
+    const hide = !bj.over;
+    g.innerHTML = `<div class="cz-note">Dealer ${hide ? '' : '(' + total(bj.d) + ')'}</div>
+      <div class="cz-hand">${bj.d.map((c, i) => cardHtml(c, hide && i === 1)).join('')}</div>
+      <div class="cz-note">You (${total(bj.p)})</div>
+      <div class="cz-hand">${bj.p.map(c => cardHtml(c)).join('')}</div>
+      <div class="row-btns" style="justify-content:center">${hide
+        ? '<button class="btn-action" data-a="hit">Hit</button><button class="btn-action" data-a="stand">Stand</button>'
+        : '<button class="btn-action btn-gold" data-a="deal">Deal again</button>'}</div>`;
+  }
+  function endBJ(r, extra) {
+    bj.over = true; const b = bj.bet;
+    if (r === 'win') pay(b * 2); else if (r === 'push') pay(b); else if (r === 'bj') pay(b + Math.floor(b * 1.5));
+    const t = { win: [`You win ${fmt(b)} ${unit()}!`, true], bj: [`BLACKJACK! You win ${fmt(Math.floor(b * 1.5))} ${unit()}!`, true],
+                push: ['Push. Your bet is returned.'], lose: [`You lose ${fmt(b)} ${unit()}.`, false] }[r];
+    drawBJ(); msg((extra ? extra + ' ' : '') + t[0], t[1]); sync();
+    if (r === 'win' || r === 'bj') audioEngine.playSound('golden');
+  }
+  act.deal = () => {
+    if (locked()) return; const b = getBet(); if (!b) return;
+    pay(-b);
+    bj = { deck: newDeck(), p: [], d: [], bet: b, over: false };
+    bj.p.push(bj.deck.pop(), bj.deck.pop()); bj.d.push(bj.deck.pop(), bj.deck.pop());
+    const pb = total(bj.p) === 21, db = total(bj.d) === 21;
+    if (pb || db) return endBJ(pb && db ? 'push' : pb ? 'bj' : 'lose');
+    msg(''); drawBJ(); sync();
+  };
+  act.hit = () => {
+    if (!bj || bj.over) return;
+    bj.p.push(bj.deck.pop());
+    const t = total(bj.p);
+    if (t > 21) endBJ('lose', 'Bust!'); else if (t === 21) act.stand(); else drawBJ();
+  };
+  act.stand = () => {
+    if (!bj || bj.over) return;
+    while (total(bj.d) < 17) bj.d.push(bj.deck.pop());
+    const p = total(bj.p), d = total(bj.d);
+    endBJ(d > 21 || p > d ? 'win' : p === d ? 'push' : 'lose', d > 21 ? 'Dealer busts!' : '');
+  };
+
+  // Cat Slots: 3 in a row pays big, a pair of ⭐/💎/👑 returns your bet
+  const SYM = [['🐱', 40, 6], ['🐟', 25, 12], ['🧶', 15, 30], ['⭐', 10, 80], ['💎', 6, 200], ['👑', 4, 500]];
+  const spinSym = () => { let r = Math.random() * 100; for (const s of SYM) { r -= s[1]; if (r < 0) return s; } return SYM[0]; };
+  act.spin = () => {
+    if (busy) return; const b = getBet(); if (!b) return;
+    busy = true; pay(-b);
+    const res = [spinSym(), spinSym(), spinSym()];
+    let mult = 0;
+    if (res[0][0] === res[1][0] && res[1][0] === res[2][0]) mult = res[0][2];
+    else for (const s of SYM.slice(3)) if (res.filter(r => r[0] === s[0]).length === 2) mult = 1;
+    if (mult) pay(b * mult);
+    msg('Spinning…');
+    const reels = [0, 1, 2].map(i => $$('cz-r' + i)), stopped = [false, false, false];
+    const iv = setInterval(() => reels.forEach((r, i) => { if (!stopped[i]) r.textContent = SYM[Math.floor(Math.random() * SYM.length)][0]; }), 80);
+    [600, 1000, 1400].forEach((t, i) => setTimeout(() => {
+      stopped[i] = true; reels[i].textContent = res[i][0];
+      if (i < 2) return;
+      clearInterval(iv);
+      if (mult > 1) { msg(`${mult >= 80 ? 'JACKPOT! ' : ''}×${mult}! You won ${fmt(b * mult - b)} ${unit()}!`, true); audioEngine.playSound('golden'); }
+      else if (mult === 1) msg('A pair! Your bet is returned.');
+      else msg(`No match. You lost ${fmt(b)} ${unit()}.`, false);
+      sync(); busy = false;
+    }, t));
+  };
+
+  act.cur = (v) => { if (locked()) return msg('Finish your hand first.'); cur = v; renderCasino(); };
+  act.game = (v) => { if (locked()) return msg('Finish your hand first.'); game = v; renderCasino(); };
+  act.frac = (f) => { $$('cz-bet').value = Math.max(1, Math.floor(bal() * f)); };
+  casino.addEventListener('click', (e) => { const b = e.target.closest('[data-a]'); if (b && act[b.dataset.a]) act[b.dataset.a](b.dataset.v); });
+
+  function renderCasino() {
+    $$('cz-c-pats').classList.toggle('active', cur === 'pats');
+    $$('cz-c-paws').classList.toggle('active', cur === 'paws');
+    ['flip', 'bj', 'slots'].forEach(g => $$('cz-g-' + g).classList.toggle('active', game === g));
+    $$('cz-bal').textContent = `${fmt(bal())} ${unit()}`;
+    const g = $$('cz-game');
+    if (game === 'flip') g.innerHTML = `<div id="cz-coin" class="cz-big">🪙</div>
+      <div class="row-btns" style="justify-content:center"><button class="btn-action" data-a="flip" data-v="H">😺 Heads</button><button class="btn-action" data-a="flip" data-v="T">🐾 Tails</button></div>
+      <div id="cz-msg" class="cz-msg"></div><div class="cz-note">48% chance to win. Pays 2× your bet.</div>`;
+    else if (game === 'bj') { g.innerHTML = `<div id="cz-bj"></div><div id="cz-msg" class="cz-msg"></div>
+      <div class="cz-note">Blackjack pays 3:2. Dealer stands on 17. Closing the page mid-hand forfeits your bet.</div>`; drawBJ(); }
+    else g.innerHTML = `<div class="cz-reels"><div class="cz-reel" id="cz-r0">🐱</div><div class="cz-reel" id="cz-r1">🐱</div><div class="cz-reel" id="cz-r2">🐱</div></div>
+      <div class="row-btns" style="justify-content:center"><button class="btn-action btn-gold" data-a="spin">Spin</button></div>
+      <div id="cz-msg" class="cz-msg"></div>
+      <div class="cz-note">3 in a row: 🐱×6 · 🐟×12 · 🧶×30 · ⭐×80 · 💎×200 · 👑×500<br>A pair of ⭐ / 💎 / 👑 returns your bet.</div>`;
+  }
+
+  // ---------- 3) Cat Closet (cosmetic accessories) ----------
+  const ACC = `hat|🎩|Top Hat|1e4
+hat|🧢|Baseball Cap|5e4
+hat|👒|Sun Hat|2e5
+hat|🎓|Graduation Cap|1e6
+hat|🤠|Cowboy Hat|5e6
+hat|🪖|Army Helmet|2e7
+hat|⛑️|Rescue Cap|1e8
+hat|👑|Golden Crown|1e9
+hat|🪩|Disco Ball|1e11
+hat|🌟|Halo Star|1e13
+face|🕶️|Cool Shades|1e4
+face|👓|Nerd Glasses|5e4
+face|🥽|Goggles|5e5
+face|🎭|Fancy Mask|1e7
+face|🌸|Blossom|3e8
+neck|🎀|Pink Bow|5e3
+neck|🔔|Bell Collar|5e4
+neck|🧣|Cozy Scarf|3e5
+neck|📿|Pearl Necklace|3e6
+neck|🏅|Gold Medal|5e7
+neck|🏆|Trophy|1e10
+neck|💎|Diamond Pendant|1e12
+aura|✨|Gold Glow|1e5|#f1c40f
+aura|🔥|Fire Aura|5e7|#ff5722
+aura|❄️|Frost Aura|1e9|#4fc3f7
+aura|💜|Mystic Aura|1e11|#ab47bc
+aura|🌌|Galaxy Aura|1e13|#3f51b5
+aura|🌈|Rainbow Aura|1e15|#ff4081`.split('\n').map((l, i) => {
+    const [slot, icon, name, cost, color] = l.split('|');
+    return { id: slot + i, slot, icon, name, cost: +cost, color };
+  });
+  const SLOTS = [['hat', '🎩 Hats'], ['face', '🕶️ Face'], ['neck', '🎀 Neck'], ['aura', '✨ Auras']];
+  const A = () => { state.accOwned = state.accOwned || {}; state.accWorn = state.accWorn || {}; return state; };
+
+  const closet = mk('closet-tab', '');
+  addTab('closet-tab', '👗 Closet');
+
+  const layer = document.createElement('div');
+  layer.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:11';
+  document.querySelector('.cat-stage').appendChild(layer);
+  let lookSig = '';
+  function applyLook() {
+    const w = A().accWorn, sig = JSON.stringify(w);
+    if (sig === lookSig) return; lookSig = sig;
+    const get = (s) => ACC.find(a => a.id === w[s]);
+    const hat = get('hat'), face = get('face'), neck = get('neck'), aura = get('aura');
+    layer.innerHTML = (hat ? `<div class="acc acc-hat">${hat.icon}</div>` : '') + (face ? `<div class="acc acc-face">${face.icon}</div>` : '')
+      + (neck ? `<div class="acc acc-neck">${neck.icon}</div>` : '');
+    catBtn.style.boxShadow = aura ? `0 0 55px 16px ${aura.color}, 0 12px 30px rgba(0,0,0,.2)` : '';
+  }
+  setInterval(applyLook, 500);
+
+  function renderCloset() {
+    const st = A();
+    const card = (a) => {
+      const owned = st.accOwned[a.id], worn = st.accWorn[a.slot] === a.id;
+      return `<div class="upgrade-card ${owned ? 'owned' : ''}" ${owned ? '' : `data-cost="${a.cost}"`} data-acc="${a.id}">
+        <div class="upgrade-icon">${a.icon}</div>
+        <div class="upgrade-details"><div class="upgrade-name">${a.name}</div>
+        <div class="upgrade-cost">${owned ? (worn ? '✅ Wearing (click to remove)' : 'Owned (click to wear)') : fmt(a.cost) + ' pats'}</div></div></div>`;
+    };
+    closet.innerHTML = `<div class="panel"><h3 class="panel-title"><span>👗 Closet</span><span style="font-size:12px;color:var(--text-light)">Cosmetic only. Buy once, then click to wear or remove. Your cat on the Game tab shows what you wear.</span></h3>
+      ${SLOTS.map(([s, t]) => `<h4 style="margin:6px 0">${t}</h4><div class="boost-grid">${ACC.filter(a => a.slot === s).map(card).join('')}</div>`).join('')}</div>`;
+  }
+  closet.addEventListener('click', (e) => {
+    const c = e.target.closest('[data-acc]'); if (!c) return;
+    const a = ACC.find(x => x.id === c.dataset.acc), st = A();
+    if (!st.accOwned[a.id]) {
+      if (st.pats < a.cost) return showToast('Not enough pats!', '⚠️');
+      st.pats -= a.cost; st.accOwned[a.id] = 1; st.accWorn[a.slot] = a.id;
+      audioEngine.playSound('buy'); showToast(`Bought ${a.name}!`, a.icon);
+    } else if (st.accWorn[a.slot] === a.id) delete st.accWorn[a.slot];
+    else st.accWorn[a.slot] = a.id;
+    saveGame(false); renderCloset(); applyLook(); updateDisplay();
+  });
+})();
+</script>
 </script>
